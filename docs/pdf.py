@@ -5,16 +5,17 @@ from fpdf.enums import Align
 class PDF:
     def __init__(
         self
-    ) -> None:
+    ):
         self.__pdf = FPDF()
         self.__font_name = "Arial"
-        self.__font_size = 12
+        self.__font_size = 14
+        self.__alignment = "left"
         self.__font_styles = {
             "bold": False,
             "italic": False,
             "underline": False
         }
-        self.set_font(self.__font_name, self.__font_size, **self.__font_styles)
+        self.set_settings(self.__font_name, self.__font_size, self.__alignment, **self.__font_styles)
         self.__line_spacing = 1
         self.__paragraph_spacing = 1
         self.__first_addition = True
@@ -23,17 +24,24 @@ class PDF:
 
     def set_font_name(
         self,
-        name: str
+        font_name: str
     ) -> None:
-        self.__font_name = name
-        self.__pdf.set_font(name, self.__pdf.font_style, self.__font_size)
+        self.__font_name = font_name
+        self.__pdf.set_font(font_name, self.__pdf.font_style, self.__font_size)
 
     def set_font_size(
         self,
-        size: float
+        font_size: float
     ) -> None:
-        self.__font_size = size
-        self.__pdf.set_font_size(size)
+        self.__font_size = font_size
+        self.__pdf.set_font_size(font_size)
+
+    def set_alignment(
+        self,
+        alignment: str
+    ) -> None:
+        self._make_alignment(alignment)
+        self.__alignment = alignment
 
     def set_font_style(
         self,
@@ -53,18 +61,21 @@ class PDF:
                 style += type[0].upper()
         self.__pdf.set_font(self.__font_name, style, self.__font_size)
 
-    def set_font(
+    def set_settings(
         self,
-        name: str = None,
-        size: float = None,
+        font_name: str = None,
+        font_size: float = None,
+        alignment: str = None,
         bold: bool = None,
         italic: bool = None,
         underline: bool = None
     ) -> None:
-        if name is not None:
-            self.set_font_name(name)
-        if size is not None:
-            self.set_font_size(size)
+        if font_name is not None:
+            self.set_font_name(font_name)
+        if font_size is not None:
+            self.set_font_size(font_size)
+        if alignment is not None:
+            self.set_alignment(alignment)
         self.set_font_style(bold, italic, underline)
 
     def set_margin_top(
@@ -131,52 +142,53 @@ class PDF:
     def add_paragraph(
         self,
         text: str,
-        alignment: str = "left",
         spacing: float = None,
         font_name: str = None,
         font_size: float = None,
+        alignment: str = None,
         bold: bool = None,
         italic: bool = None,
         underline: bool = None
     ) -> None:
         last_font_name = self.__font_name
         last_font_size = self.__font_size
+        last_alignment = self.__alignment
         last_font_styles = self.__font_styles.copy()
         self._add_spacing(spacing)
-        self.set_font(font_name, font_size, bold, italic, underline)
-        self.__pdf.multi_cell(w=0, h=self.__line_spacing * self.__pdf.font_size, text=text, align=self._make_alignment(alignment))
-        print(last_font_styles, self.__font_styles)
-        self.set_font(last_font_name, last_font_size, **last_font_styles)
+        self.set_settings(font_name, font_size, alignment, bold, italic, underline)
+        self.__pdf.multi_cell(w=0, h=self.__line_spacing * self.__pdf.font_size, text=text, align=self._make_alignment(self.__alignment))
+        self.set_settings(last_font_name, last_font_size, last_alignment, **last_font_styles)
 
     def add_image(
         self,
         image_path: str,
         image_width: float = None,
         image_height: float = None,
-        image_alignment: str = "center",
-        caption_text: str = None,
-        caption_spacing: float = None,
-        caption_alignment: str = "center",
-        caption_font_name: str = None,
-        caption_font_size: float = None,
-        caption_bold: bool = None,
-        caption_italic: bool = None,
-        caption_underline: bool = None
+        image_alignment: str = None,
+        text: str = None,
+        spacing: float = None,
+        font_name: str = None,
+        font_size: float = None,
+        alignment: str = None,
+        bold: bool = None,
+        italic: bool = None,
+        underline: bool = None
     ) -> None:
         width = 0 if image_width is None else image_width
         height = 0 if image_height is None else image_height
+        img_alignment = self.__alignment if image_alignment is None else image_alignment
         self._add_spacing()
-        self.__pdf.image(image_path, x=self._make_alignment(image_alignment), w=width, h=height)
-        if caption_text is not None:
+        self.__pdf.image(image_path, x=self._make_alignment(img_alignment), w=width, h=height)
+        if text is not None:
             self.add_paragraph(
-                caption_text,
-                caption_alignment,
-                caption_spacing,
-                caption_font_name,
-                caption_font_size,
-                caption_bold,
-                caption_italic,
-                caption_underline
+                text,
+                spacing,
+                font_name,
+                font_size,
+                alignment,
+                bold,
+                italic,
+                underline
             )
 
     def save(
@@ -213,3 +225,33 @@ class PDF:
         elif alignment == "justify":
             return Align.J
         raise TypeError(f"Alignment '{alignment}' is not valid. Valid values are 'left', 'right', 'center', 'justify'.")
+
+
+class Settings:
+    def __init__(
+        self,
+        font_name: str = None,
+        font_size: float = None,
+        alignment: str = None,
+        bold: bool = None,
+        italic: bool = None,
+        underline: bool = None
+    ):
+        self.font_name = font_name
+        self.font_size = font_size
+        self.alignment = alignment
+        self.bold = bold
+        self.italic = italic
+        self.underline = underline
+
+    def get(
+        self
+    ) -> dict:
+        return {
+            "font_name": self.font_name,
+            "font_size": self.font_size,
+            "alignment": self.alignment,
+            "bold": self.bold,
+            "italic": self.italic,
+            "underline": self.underline
+        }
