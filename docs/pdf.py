@@ -1,5 +1,56 @@
 from fpdf import FPDF
 from fpdf.enums import Align
+from fpdf.fonts import FontFace
+from typing import List
+
+
+class Settings:
+    def __init__(
+        self,
+        font_name: str = None,
+        font_size: float = None,
+        alignment: str = None,
+        bold: bool = None,
+        italic: bool = None,
+        underline: bool = None
+    ):
+        self.font_name = font_name
+        self.font_size = font_size
+        self.alignment = alignment
+        self.bold = bold
+        self.italic = italic
+        self.underline = underline
+
+    def get(
+        self
+    ) -> dict:
+        return {
+            "font_name": self.font_name,
+            "font_size": self.font_size,
+            "alignment": self.alignment,
+            "bold": self.bold,
+            "italic": self.italic,
+            "underline": self.underline
+        }
+
+
+class Table:
+    def __init__(
+        self,
+        data: List[List[str]],
+        settings: List[List[Settings]] = None
+    ):
+        self.data = data
+        if len(set([len(row) for row in data])) != 1:
+            raise TypeError("Table data has different length of rows.")
+        if settings is None:
+            self.settings = [[Settings() for _ in range(len(data[0]))] for _ in range(len(data))]
+        else:
+            if len(set([len(row) for row in settings])) != 1:
+                raise TypeError("Table settings has different length of rows.")
+            if len(settings[0]) != len(data[0]) or len(settings) != len(data):
+                raise TypeError("Table data and table settings have different shapes.")
+            self.settings = settings
 
 
 class PDF:
@@ -154,7 +205,7 @@ class PDF:
         last_font_size = self.__font_size
         last_alignment = self.__alignment
         last_font_styles = self.__font_styles.copy()
-        self._add_spacing(spacing)
+        self.add_spacing(spacing)
         self.set_settings(font_name, font_size, alignment, bold, italic, underline)
         self.__pdf.multi_cell(w=0, h=self.__line_spacing * self.__pdf.font_size, text=text, align=self._make_alignment(self.__alignment))
         self.set_settings(last_font_name, last_font_size, last_alignment, **last_font_styles)
@@ -177,7 +228,7 @@ class PDF:
         width = 0 if image_width is None else image_width
         height = 0 if image_height is None else image_height
         img_alignment = self.__alignment if image_alignment is None else image_alignment
-        self._add_spacing()
+        self.add_spacing()
         self.__pdf.image(image_path, x=self._make_alignment(img_alignment), w=width, h=height)
         if text is not None:
             self.add_paragraph(
@@ -191,13 +242,26 @@ class PDF:
                 underline
             )
 
-    def save(
+    def add_table(
         self,
-        filename: str
+        table: Table
     ) -> None:
-        self.__pdf.output(filename)
+        self.add_spacing()
+        with self.__pdf.table(first_row_as_headings=False) as t:
+            for i in range(len(table.data)):
+                row = t.row()
+                for j in range(len(table.data[i])):
+                    params = table.settings[i][j]
+                    style = ""
+                    if params.bold or params.bold is None and self.__font_styles["bold"]:
+                        style += "B"
+                    if params.italic or params.italic is None and self.__font_styles["italic"]:
+                        style += "I"
+                    if params.underline or params.underline is None and self.__font_styles["underline"]:
+                        style += "U"
+                    row.cell(table.data[i][j], style=FontFace(emphasis=style), align=self._make_alignment(params.alignment or self.__alignment))
 
-    def _add_spacing(
+    def add_spacing(
         self,
         spacing: float = None
     ) -> None:
@@ -212,9 +276,15 @@ class PDF:
             self.__first_addition = False
             self.__pdf.set_y(self.__pdf.t_margin)
 
+    def save(
+        self,
+        filename: str
+    ) -> None:
+        self.__pdf.output(filename)
+
     @staticmethod
     def _make_alignment(
-        alignment
+        alignment: str
     ) -> Align:
         if alignment == "left":
             return Align.L
@@ -225,33 +295,3 @@ class PDF:
         elif alignment == "justify":
             return Align.J
         raise TypeError(f"Alignment '{alignment}' is not valid. Valid values are 'left', 'right', 'center', 'justify'.")
-
-
-class Settings:
-    def __init__(
-        self,
-        font_name: str = None,
-        font_size: float = None,
-        alignment: str = None,
-        bold: bool = None,
-        italic: bool = None,
-        underline: bool = None
-    ):
-        self.font_name = font_name
-        self.font_size = font_size
-        self.alignment = alignment
-        self.bold = bold
-        self.italic = italic
-        self.underline = underline
-
-    def get(
-        self
-    ) -> dict:
-        return {
-            "font_name": self.font_name,
-            "font_size": self.font_size,
-            "alignment": self.alignment,
-            "bold": self.bold,
-            "italic": self.italic,
-            "underline": self.underline
-        }

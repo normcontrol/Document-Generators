@@ -1,4 +1,4 @@
-from docs import PDF, Settings
+from docs import PDF, Table, Settings
 
 pdf = PDF()
 
@@ -43,5 +43,14 @@ pdf.add_paragraph(
     "Eat some more of these soft French rolls and drink some tea",
     spacing=10
 )
+
+table = Table([
+    ["first cell", "second cell"],
+    ["third cell", "fourth cell"]
+])
+cell_settings = Settings(italic=True, bold=True, alignment="center")
+table.settings[0][0] = cell_settings
+table.settings[1][1] = cell_settings
+pdf.add_table(table)
 
 pdf.save("example.pdf")

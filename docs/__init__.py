@@ -1,1 +1,1 @@
-from .pdf import PDF, Settings
+from .pdf import PDF, Settings, Table
