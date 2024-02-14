@@ -363,7 +363,8 @@ class DOCX:
         self.__docx.styles.add_style(style_name, WD_STYLE_TYPE.PARAGRAPH)
         self.__docx.styles[style_name].base_style = self.__docx.styles["List Number"]
         self.__docx.styles[style_name].paragraph_format.number_format = numbered_list.number_string.replace("{i}", "\t")
-        self.__docx.styles[style_name].paragraph_format.first_line_indent = numbered_list.indent
+        self.__docx.styles[style_name].paragraph_format.left_indent = Cm(numbered_list.indent)
+        self.__docx.styles[style_name].paragraph_format.first_line_indent = 0
         ns = numbered_list.number_settings
         self.__docx.styles[style_name].font.name = ns.font_name or self.__font_name
         self.__docx.styles[style_name].font.size = Pt(ns.font_size or self.__font_size)
@@ -409,7 +410,8 @@ class DOCX:
         self.__increment += 1
         self.__docx.styles.add_style(style_name, WD_STYLE_TYPE.PARAGRAPH)
         self.__docx.styles[style_name].base_style = self.__docx.styles["List Bullet"]
-        self.__docx.styles[style_name].paragraph_format.first_line_indent = bulleted_list.indent
+        self.__docx.styles[style_name].paragraph_format.left_indent = Cm(bulleted_list.indent)
+        self.__docx.styles[style_name].paragraph_format.first_line_indent = 0
         bs = bulleted_list.bullet_settings
         self.__docx.styles[style_name].font.name = bs.font_name or self.__font_name
         self.__docx.styles[style_name].font.size = Pt(bs.font_size or self.__font_size)
@@ -433,6 +435,56 @@ class DOCX:
                 **bulleted_list.settings[i].get(),
                 style=style_name
             )
+
+    def add_image(
+        self,
+        image: Image,
+        image_width,
+        image_height,
+        image_spacing: float = None,
+        text: str = None,
+        text_spacing: float = None
+    ) -> None:
+        """
+        Adds an image to document
+        Добавляет изображение в документ
+
+        Args:
+            image (Image):
+                The image object to be added
+                Объект изображения, который нужно добавить
+            image_width (float):
+                The width of the image in document
+                Ширина изображения в документе
+            image_height (float):
+                The height of the image in document
+                Высота изображения в документе
+            image_spacing (float, optional):
+                The spacing to be added before the image. If not specified, the default settings are used
+                Интервал, добавляемый перед изображением. Если не указан, используются настройки по умолчанию
+            text (str, optional):
+                The text to be added below the image. If not specified, the text is not added
+                Текст, который нужно добавить под изображением. Если не указан, текст не добавляется
+            text_spacing (float, optional):
+                The spacing to be added before the text. If not specified, the default settings are used
+                Интервал, добавляемый перед текстом. Если не указан, используются настройки по умолчанию
+        """
+        settings = image.settings
+        img_alignment = self.__alignment if settings.alignment is None else settings.alignment
+        paragraph = self.__docx.add_paragraph()
+        run = paragraph.add_run()
+        run.add_picture(image.image_path, width=Cm(image_width), height=Cm(image_height))
+        p_format = paragraph.paragraph_format
+        p_font = run.font
+        paragraph.paragraph_format.alignment = self._make_alignment(img_alignment)
+        if image_spacing is not None:
+            p_format.space_before = Cm(image_spacing)
+        elif self.__fixed_paragraph_spacing is not None:
+            p_format.space_before = Cm(self.__fixed_paragraph_spacing)
+        else:
+            p_format.space_before = int(self.__paragraph_spacing * p_font.size)
+        if text is not None:
+            self._add_text(text, text_spacing, **settings.get())
 
     def save(
         self,
@@ -471,11 +523,12 @@ class DOCX:
         p_font.italic = italic or self.__font_styles["italic"]
         p_font.underline = underline or self.__font_styles["underline"]
         if spacing is not None:
-            p_format.space_before = spacing
+            p_format.space_before = Cm(spacing)
         elif self.__fixed_paragraph_spacing is not None:
-            p_format.space_before = self.__fixed_paragraph_spacing
+            p_format.space_before = Cm(self.__fixed_paragraph_spacing)
         else:
-            p_format.space_before = self.__paragraph_spacing * p_font.size
+            print(int(self.__paragraph_spacing * p_font.size))
+            p_format.space_before = int(self.__paragraph_spacing * p_font.size)
 
     @staticmethod
     def _make_alignment(

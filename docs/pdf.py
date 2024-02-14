@@ -441,8 +441,8 @@ class PDF:
     def add_image(
         self,
         image: Image,
-        image_width: float = None,
-        image_height: float = None,
+        image_width: float,
+        image_height: float,
         image_spacing: float = None,
         text: str = None,
         text_spacing: float = None
@@ -455,12 +455,12 @@ class PDF:
             image (Image):
                 The image object to be added
                 Объект изображения, который нужно добавить
-            image_width (float, optional):
-                The width of the image. If not specified, the image retains its original width
-                Ширина изображения. Если не указано, изображение сохраняет свою оригинальную ширину
-            image_height (float, optional):
-                The height of the image. If not specified, the image retains its original height
-                Высота изображения. Если не указано, изображение сохраняет свою оригинальную высоту
+            image_width (float):
+                The width of the image in document
+                Ширина изображения в документе
+            image_height (float):
+                The height of the image in document
+                Высота изображения в документе
             image_spacing (float, optional):
                 The spacing to be added before the image. If not specified, the default settings are used
                 Интервал, добавляемый перед изображением. Если не указан, используются настройки по умолчанию
@@ -471,12 +471,10 @@ class PDF:
                 The spacing to be added before the text. If not specified, the default settings are used
                 Интервал, добавляемый перед текстом. Если не указан, используются настройки по умолчанию
         """
-        width = 0 if image_width is None else image_width
-        height = 0 if image_height is None else image_height
         settings = image.settings
         img_alignment = self.__alignment if settings.alignment is None else settings.alignment
         self.add_spacing(image_spacing)
-        self.__pdf.image(image.image_path, x=self._make_alignment(img_alignment), w=width, h=height)
+        self.__pdf.image(image.image_path, x=self._make_alignment(img_alignment), w=image_width * self.__cm_k, h=image_height * self.__cm_k)
         if text is not None:
             self.add_paragraph(text, text_spacing, **settings.get())
 
@@ -527,11 +525,11 @@ class PDF:
         """
         self.__pdf.set_x(self.__pdf.l_margin)
         if spacing is not None:
-            self.__pdf.set_y(self.__pdf.get_y() + spacing)
+            self.__pdf.set_y(self.__pdf.get_y() + spacing * self.__cm_k)
         elif self.__fixed_paragraph_spacing is not None:
-            self.__pdf.set_y(self.__pdf.get_y() + self.__fixed_paragraph_spacing)
+            self.__pdf.set_y(self.__pdf.get_y() + self.__fixed_paragraph_spacing * self.__cm_k)
         else:
-            self.__pdf.set_y(self.__pdf.get_y() + self.__paragraph_spacing * self.__pdf.font_size)
+            self.__pdf.set_y(self.__pdf.get_y() + self.__paragraph_spacing * self.__pdf.font_size * self.__cm_k)
         if self.__first_addition:
             self.__first_addition = False
             self.__pdf.set_y(self.__pdf.t_margin)
