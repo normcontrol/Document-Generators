@@ -10,6 +10,7 @@ class NumberedList:
         number_start: int = 1,
         number_increment: int = 1,
         number_string: str = "{i}.",
+        number_settings: Settings = None,
         indent: float = 10,
         between_spacing: float = None
     ):
@@ -33,6 +34,9 @@ class NumberedList:
             number_string (str, optional):
                 The string format for the list item numbers. Defaults to "{i}."
                 Формат строки для номеров элементов списка. По умолчанию "{i}."
+            number_settings (Settings, optional):
+                A list of Settings objects to customize the appearance of the numbering. If not specified, the default settings are used
+                Список объектов Settings для настройки внешнего вида нумерации. Если не указан, используются настройки по умолчанию
             indent (float, optional):
                 The indentation of list items from the left edge of the page. Defaults to 10
                 Отступ элементов списка от левого края страницы. По умолчанию 10
@@ -50,6 +54,9 @@ class NumberedList:
         self.number_start = number_start
         self.number_increment = number_increment
         self.number_string = number_string
+        if number_settings is None:
+            number_settings = Settings()
+        self.number_settings = number_settings
         self.indent = indent
         self.between_spacing = between_spacing
 
@@ -73,3 +80,20 @@ class NumberedList:
         if settings is None:
             settings = Settings()
         self.settings[index - 1] = settings
+
+    def set_number_settings(
+        self,
+        settings: Settings = None
+    ) -> None:
+        """
+        Sets the settings for the numbering
+        Устанавливает настройки для нумерации
+
+        Args:
+            settings (Settings, optional):
+                A Settings object with settings for the numbering. If not specified, default settings are used
+                Объект Settings с настройками для нумерации. Если не указан, используются настройки по умолчанию
+        """
+        if settings is None:
+            settings = Settings()
+        self.number_settings = settings

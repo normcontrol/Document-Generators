@@ -1,7 +1,7 @@
-from docs import PDF
+from docs import DOCX
 from docs.structs import Settings, Image, Table, NumberedList, BulletedList
 
-pdf = PDF()
+docx = DOCX()
 
 main_settings = Settings(
     font_name="Arial",
@@ -11,15 +11,15 @@ main_settings = Settings(
     italic=False,
     underline=False
 )
-pdf.set_settings(**main_settings.get())
-pdf.set_fixed_paragraph_spacing(5)
+docx.set_settings(**main_settings.get())
+docx.set_fixed_paragraph_spacing(5)
 
-pdf.add_paragraph(
+docx.add_paragraph(
     "Eat some more of these soft French rolls and drink some tea",
     bold=True
 )
 
-pdf.add_paragraph(
+docx.add_paragraph(
     "Eat some more of these soft French rolls and drink some tea",
     font_size=30,
     italic=True
@@ -28,9 +28,9 @@ pdf.add_paragraph(
 image_settings = Settings(font_size=10, alignment="center", underline=True)
 image = Image("https://blockchainmedia.id/wp-content/uploads/2021/11/Square-Whitepaper-DEX-Bitcoin-Bursa-Terdesentralisasi.jpeg")
 image.set_settings(image_settings)
-pdf.add_image(image, image_width=100, image_height=50, text="This is a square", text_spacing=1)
+# docx.add_image(image, image_width=100, image_height=50, text="This is a square", text_spacing=1)
 
-pdf.add_paragraph(
+docx.add_paragraph(
     "Eat some more of these soft French rolls and drink some tea",
     spacing=10
 )
@@ -42,9 +42,9 @@ table = Table([
 cell_settings = Settings(italic=True, bold=True, alignment="center")
 table.set_settings(1, 1, cell_settings)
 table.set_settings(2, 2, cell_settings)
-pdf.add_table(table)
+# docx.add_table(table)
 
-second_list_settings = Settings(bold=True, font_size=20, alignment="center")
+list_settings = Settings(bold=True, font_size=20)
 
 numbered_list = NumberedList(
     [
@@ -53,11 +53,12 @@ numbered_list = NumberedList(
         "This is third sentence."
     ],
     number_string="({i})",
+    number_start=2,
     number_increment=3,
     between_spacing=1
 )
-numbered_list.set_settings(2, second_list_settings)
-pdf.add_numbered_list(numbered_list, spacing=15)
+numbered_list.set_number_settings(list_settings)
+docx.add_numbered_list(numbered_list, spacing=15)
 
 bulleted_list = BulletedList(
     [
@@ -67,11 +68,11 @@ bulleted_list = BulletedList(
     ],
     between_spacing=1
 )
-bulleted_list.set_settings(2, second_list_settings)
-pdf.add_bulleted_list(bulleted_list, spacing=15)
+bulleted_list.set_bullet_settings(list_settings)
+docx.add_bulleted_list(bulleted_list, spacing=15)
 
-pdf.add_paragraph(
+docx.add_paragraph(
     "Eat some more of these soft French rolls and drink some tea"
 )
 
-pdf.save("example.pdf")
+docx.save("example_docx.docx")
