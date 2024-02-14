@@ -1,4 +1,5 @@
-from docs import PDF, Table, Settings
+from docs import PDF
+from docs.structs import Settings, Table, NumberedList, BulletedList
 
 pdf = PDF()
 
@@ -49,8 +50,38 @@ table = Table([
     ["third cell", "fourth cell"]
 ])
 cell_settings = Settings(italic=True, bold=True, alignment="center")
-table.settings[0][0] = cell_settings
-table.settings[1][1] = cell_settings
+table.set_settings(1, 1, cell_settings)
+table.set_settings(2, 2, cell_settings)
 pdf.add_table(table)
+
+second_list_settings = Settings(bold=True, font_size=20, alignment="center")
+
+numbered_list = NumberedList(
+    [
+        "This is first sentence. This is first sentence. This is first sentence. This is first sentence. This is first sentence. This is first sentence. This is first sentence. This is first sentence.",
+        "This is second sentence.",
+        "This is third sentence."
+    ],
+    number_string="({i})",
+    number_increment=3,
+    between_spacing=1
+)
+numbered_list.set_settings(2, second_list_settings)
+pdf.add_numbered_list(numbered_list, spacing=15)
+
+bulleted_list = BulletedList(
+    [
+        "This is first sentence. This is first sentence. This is first sentence. This is first sentence. This is first sentence. This is first sentence. This is first sentence. This is first sentence.",
+        "This is second sentence.",
+        "This is third sentence."
+    ],
+    between_spacing=1
+)
+bulleted_list.set_settings(2, second_list_settings)
+pdf.add_bulleted_list(bulleted_list, spacing=15)
+
+pdf.add_paragraph(
+    "Eat some more of these soft French rolls and drink some tea"
+)
 
 pdf.save("example.pdf")

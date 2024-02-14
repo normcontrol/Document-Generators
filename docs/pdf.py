@@ -1,56 +1,7 @@
 from fpdf import FPDF
 from fpdf.enums import Align
 from fpdf.fonts import FontFace
-from typing import List
-
-
-class Settings:
-    def __init__(
-        self,
-        font_name: str = None,
-        font_size: float = None,
-        alignment: str = None,
-        bold: bool = None,
-        italic: bool = None,
-        underline: bool = None
-    ):
-        self.font_name = font_name
-        self.font_size = font_size
-        self.alignment = alignment
-        self.bold = bold
-        self.italic = italic
-        self.underline = underline
-
-    def get(
-        self
-    ) -> dict:
-        return {
-            "font_name": self.font_name,
-            "font_size": self.font_size,
-            "alignment": self.alignment,
-            "bold": self.bold,
-            "italic": self.italic,
-            "underline": self.underline
-        }
-
-
-class Table:
-    def __init__(
-        self,
-        data: List[List[str]],
-        settings: List[List[Settings]] = None
-    ):
-        self.data = data
-        if len(set([len(row) for row in data])) != 1:
-            raise TypeError("Table data has different length of rows.")
-        if settings is None:
-            self.settings = [[Settings() for _ in range(len(data[0]))] for _ in range(len(data))]
-        else:
-            if len(set([len(row) for row in settings])) != 1:
-                raise TypeError("Table settings has different length of rows.")
-            if len(settings[0]) != len(data[0]) or len(settings) != len(data):
-                raise TypeError("Table data and table settings have different shapes.")
-            self.settings = settings
+from .structs import Table, NumberedList, BulletedList
 
 
 class PDF:
@@ -72,6 +23,12 @@ class PDF:
         self.__first_addition = True
         self.__fixed_paragraph_spacing = None
         self.__pdf.add_page()
+
+    def add_font(
+        self,
+        font_path: str
+    ) -> None:
+        self.__pdf.add_font(fname=font_path)
 
     def set_font_name(
         self,
@@ -207,8 +164,72 @@ class PDF:
         last_font_styles = self.__font_styles.copy()
         self.add_spacing(spacing)
         self.set_settings(font_name, font_size, alignment, bold, italic, underline)
-        self.__pdf.multi_cell(w=0, h=self.__line_spacing * self.__pdf.font_size, text=text, align=self._make_alignment(self.__alignment))
+        self.__pdf.multi_cell(w=0, text=text, align=self._make_alignment(self.__alignment))
         self.set_settings(last_font_name, last_font_size, last_alignment, **last_font_styles)
+
+    def add_numbered_list(
+        self,
+        numbered_list: NumberedList,
+        spacing: float = None
+    ):
+        for i in range(len(numbered_list.data)):
+            if i == 0:
+                if spacing is not None:
+                    up_spacing = spacing
+                elif self.__fixed_paragraph_spacing is not None:
+                    up_spacing = self.__fixed_paragraph_spacing
+                else:
+                    up_spacing = self.__paragraph_spacing
+            else:
+                up_spacing = numbered_list.between_spacing
+            index = numbered_list.number_string.replace("{i}", str(numbered_list.number_start + i * numbered_list.number_increment)) + " "
+            text = numbered_list.data[i]
+            self.add_spacing(up_spacing)
+            last_font_name = self.__font_name
+            last_font_size = self.__font_size
+            last_alignment = self.__alignment
+            last_font_styles = self.__font_styles.copy()
+            settings = numbered_list.settings[i]
+            self.set_settings(**settings.get())
+            if settings.alignment is None:
+                align = self.__alignment
+            else:
+                align = settings.alignment
+            self.__pdf.cell(text=index, align=self._make_alignment(align))
+            self.__pdf.multi_cell(w=0, text=text, align=self._make_alignment(align))
+            self.set_settings(last_font_name, last_font_size, last_alignment, **last_font_styles)
+
+    def add_bulleted_list(
+        self,
+        bulleted_list: BulletedList,
+        spacing: float = None
+    ):
+        for i in range(len(bulleted_list.data)):
+            if i == 0:
+                if spacing is not None:
+                    up_spacing = spacing
+                elif self.__fixed_paragraph_spacing is not None:
+                    up_spacing = self.__fixed_paragraph_spacing
+                else:
+                    up_spacing = self.__paragraph_spacing
+            else:
+                up_spacing = bulleted_list.between_spacing
+            index = bulleted_list.bullet_string + " "
+            text = bulleted_list.data[i]
+            self.add_spacing(up_spacing)
+            last_font_name = self.__font_name
+            last_font_size = self.__font_size
+            last_alignment = self.__alignment
+            last_font_styles = self.__font_styles.copy()
+            settings = bulleted_list.settings[i]
+            self.set_settings(**settings.get())
+            if settings.alignment is None:
+                align = self.__alignment
+            else:
+                align = settings.alignment
+            self.__pdf.cell(text=index, align=self._make_alignment(align))
+            self.__pdf.multi_cell(w=0, text=text, align=self._make_alignment(align))
+            self.set_settings(last_font_name, last_font_size, last_alignment, **last_font_styles)
 
     def add_image(
         self,
@@ -244,9 +265,10 @@ class PDF:
 
     def add_table(
         self,
-        table: Table
+        table: Table,
+        spacing: float = None
     ) -> None:
-        self.add_spacing()
+        self.add_spacing(spacing)
         with self.__pdf.table(first_row_as_headings=False) as t:
             for i in range(len(table.data)):
                 row = t.row()
