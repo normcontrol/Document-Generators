@@ -1,5 +1,5 @@
 from docs import PDF
-from docs.structs import Settings, Table, NumberedList, BulletedList
+from docs.structs import Settings, Image, Table, NumberedList, BulletedList
 
 pdf = PDF()
 
@@ -25,20 +25,10 @@ pdf.add_paragraph(
     italic=True
 )
 
-image_settings = Settings(
-    font_size=10,
-    alignment="center",
-    underline=True
-)
-pdf.add_image(
-    "https://blockchainmedia.id/wp-content/uploads/2021/11/Square-Whitepaper-DEX-Bitcoin-Bursa-Terdesentralisasi.jpeg",
-    image_width=100,
-    image_height=50,
-    image_alignment="center",
-    text="This is a square",
-    spacing=2,
-    **image_settings.get()
-)
+image_settings = Settings(font_size=10, alignment="center", underline=True)
+image = Image("https://blockchainmedia.id/wp-content/uploads/2021/11/Square-Whitepaper-DEX-Bitcoin-Bursa-Terdesentralisasi.jpeg")
+image.set_settings(image_settings)
+pdf.add_image(image, image_width=100, image_height=50, text="This is a square", text_spacing=1)
 
 pdf.add_paragraph(
     "Eat some more of these soft French rolls and drink some tea",

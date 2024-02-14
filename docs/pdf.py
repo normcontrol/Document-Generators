@@ -1,7 +1,7 @@
 from fpdf import FPDF
 from fpdf.enums import Align
 from fpdf.fonts import FontFace
-from .structs import Table, NumberedList, BulletedList
+from .structs import Table, NumberedList, BulletedList, Image
 
 
 class PDF:
@@ -171,7 +171,7 @@ class PDF:
         self,
         numbered_list: NumberedList,
         spacing: float = None
-    ):
+    ) -> None:
         for i in range(len(numbered_list.data)):
             if i == 0:
                 if spacing is not None:
@@ -203,7 +203,7 @@ class PDF:
         self,
         bulleted_list: BulletedList,
         spacing: float = None
-    ):
+    ) -> None:
         for i in range(len(bulleted_list.data)):
             if i == 0:
                 if spacing is not None:
@@ -233,35 +233,21 @@ class PDF:
 
     def add_image(
         self,
-        image_path: str,
+        image: Image,
         image_width: float = None,
         image_height: float = None,
-        image_alignment: str = None,
+        image_spacing: float = None,
         text: str = None,
-        spacing: float = None,
-        font_name: str = None,
-        font_size: float = None,
-        alignment: str = None,
-        bold: bool = None,
-        italic: bool = None,
-        underline: bool = None
+        text_spacing: float = None
     ) -> None:
         width = 0 if image_width is None else image_width
         height = 0 if image_height is None else image_height
-        img_alignment = self.__alignment if image_alignment is None else image_alignment
-        self.add_spacing()
-        self.__pdf.image(image_path, x=self._make_alignment(img_alignment), w=width, h=height)
+        settings = image.settings
+        img_alignment = self.__alignment if settings.alignment is None else settings.alignment
+        self.add_spacing(image_spacing)
+        self.__pdf.image(image.image_path, x=self._make_alignment(img_alignment), w=width, h=height)
         if text is not None:
-            self.add_paragraph(
-                text,
-                spacing,
-                font_name,
-                font_size,
-                alignment,
-                bold,
-                italic,
-                underline
-            )
+            self.add_paragraph(text, text_spacing, **settings.get())
 
     def add_table(
         self,
