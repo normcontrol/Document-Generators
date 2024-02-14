@@ -13,12 +13,12 @@ class Table:
         Инициализирует объект Table
 
         Args:
-        data (List[List[str]]):
-            A 2D list of strings representing the data of the table
-            Двумерный список строк, представляющих данные таблицы
-        settings (List[List[Settings]], optional):
-            A 2D list of Settings objects to customize the appearance of each cell in the table. If not specified, default settings are used
-            Двумерный список объектов Settings для настройки внешнего вида каждой ячейки в таблице. Если не указан, используются настройки по умолчанию
+            data (List[List[str]]):
+                A 2D list of strings representing the data of the table
+                Двумерный список строк, представляющих данные таблицы
+            settings (List[List[Settings]], optional):
+                A 2D list of Settings objects to customize the appearance of each cell in the table. If not specified, default settings are used
+                Двумерный список объектов Settings для настройки внешнего вида каждой ячейки в таблице. Если не указан, используются настройки по умолчанию
         """
         self.data = data
         if len(set([len(row) for row in data])) != 1:

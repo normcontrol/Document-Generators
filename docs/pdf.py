@@ -8,6 +8,10 @@ class PDF:
     def __init__(
         self
     ):
+        """
+        Initializes a PDF object
+        Инициализирует объект PDF
+        """
         self.__pdf = FPDF()
         self.__font_name = "Arial"
         self.__font_size = 14
@@ -24,16 +28,19 @@ class PDF:
         self.__fixed_paragraph_spacing = None
         self.__pdf.add_page()
 
-    def add_font(
-        self,
-        font_path: str
-    ) -> None:
-        self.__pdf.add_font(fname=font_path)
-
     def set_font_name(
         self,
         font_name: str
     ) -> None:
+        """
+        Sets the font
+        Устанавливает шрифт
+
+        Args:
+            font_name (str):
+                The name of the font to be set
+                Имя шрифта, которое нужно установить
+        """
         self.__font_name = font_name
         self.__pdf.set_font(font_name, self.__pdf.font_style, self.__font_size)
 
@@ -41,6 +48,15 @@ class PDF:
         self,
         font_size: float
     ) -> None:
+        """
+        Sets the font size
+        Устанавливает размер шрифта
+
+        Args:
+            font_size (float):
+                The size of the font to be set
+                Размер шрифта, который нужно установить
+        """
         self.__font_size = font_size
         self.__pdf.set_font_size(font_size)
 
@@ -48,6 +64,15 @@ class PDF:
         self,
         alignment: str
     ) -> None:
+        """
+        Sets the alignment of the text
+        Устанавливает выравнивание текста
+
+        Args:
+            alignment (str):
+                The alignment of the text. Valid values are 'left', 'right', 'center', 'justify'
+                Выравнивание текста. Допустимые значения: 'left', 'right', 'center', 'justify'
+        """
         self._make_alignment(alignment)
         self.__alignment = alignment
 
@@ -57,6 +82,21 @@ class PDF:
         italic: bool = None,
         underline: bool = None
     ) -> None:
+        """
+        Sets the font style
+        Устанавливает стиль шрифта
+
+        Args:
+            bold (bool, optional):
+                Whether the text should be bold. If not specified, the current bold setting remains unchanged
+                Определяет, должен ли текст быть полужирным. Если не указано, текущая настройка полужирного остается без изменений
+            italic (bool, optional):
+                Whether the text should be italic. If not specified, the current italic setting remains unchanged
+                Определяет, должен ли текст быть курсивом. Если не указано, текущая настройка курсива остается без изменений
+            underline (bool, optional):
+                Whether the text should be underlined. If not specified, the current underline setting remains unchanged
+                Определяет, должен ли текст быть подчеркнутым. Если не указано, текущая настройка подчеркивания остается без изменений
+        """
         if bold is not None:
             self.__font_styles["bold"] = bold
         if italic is not None:
@@ -78,6 +118,30 @@ class PDF:
         italic: bool = None,
         underline: bool = None
     ) -> None:
+        """
+        Sets the settings for document
+        Устанавливает настройки для документа
+
+        Args:
+            font_name (str, optional):
+                The name of the font to be set. If not specified, the current font name remains unchanged
+                Имя шрифта, которое нужно установить. Если не указано, текущее имя шрифта остается без изменений
+            font_size (float, optional):
+                The size of the font to be set. If not specified, the current font size remains unchanged
+                Размер шрифта, который нужно установить. Если не указано, текущий размер шрифта остается без изменений
+            alignment (str, optional):
+                The alignment of the text. Valid values are 'left', 'right', 'center', 'justify'. If not specified, the current alignment remains unchanged
+                Выравнивание текста. Допустимые значения: 'left', 'right', 'center', 'justify'. Если не указано, текущее выравнивание остается без изменений
+            bold (bool, optional):
+                Whether the text should be bold. If not specified, the current bold setting remains unchanged
+                Определяет, должен ли текст быть полужирным. Если не указано, текущая настройка полужирного остается без изменений
+            italic (bool, optional):
+                Whether the text should be italicized. If not specified, the current italic setting remains unchanged
+                Определяет, должен ли текст быть курсивом. Если не указано, текущая настройка курсива остается без изменений
+            underline (bool, optional):
+                Whether the text should be underlined. If not specified, the current underline setting remains unchanged
+                Определяет, должен ли текст быть подчеркнутым. Если не указано, текущая настройка подчеркивания остается без изменений
+        """
         if font_name is not None:
             self.set_font_name(font_name)
         if font_size is not None:
@@ -90,24 +154,60 @@ class PDF:
         self,
         top: float
     ) -> None:
+        """
+        Sets the top margin of document
+        Устанавливает верхний отступ документа
+
+        Args:
+            top (float):
+                The value of the top margin to be set
+                Значение верхнего поля, которое нужно установить
+        """
         self.__pdf.set_top_margin(top)
 
     def set_margin_right(
         self,
         right: float
     ) -> None:
+        """
+        Sets the right margin of document
+        Устанавливает правый отступ документа
+
+        Args:
+            right (float):
+                The value of the right margin to be set
+                Значение правого поля, которое нужно установить
+        """
         self.__pdf.set_right_margin(right)
 
     def set_margin_bottom(
         self,
         bottom: float
     ) -> None:
+        """
+        Sets the bottom margin of document
+        Устанавливает нижний отступ документа
+
+        Args:
+            bottom (float):
+                The value of the bottom margin to be set
+                Значение нижнего поля, которое нужно установить
+        """
         self.__pdf.set_auto_page_break(True, bottom)
 
     def set_margin_left(
         self,
         left: float
     ) -> None:
+        """
+        Sets the left margin of document
+        Устанавливает левый отступ документа
+
+        Args:
+            left (float):
+                The value of the left margin to be set
+                Значение левого поля, которое нужно установить
+        """
         self.__pdf.set_left_margin(left)
 
     def set_margin(
@@ -117,6 +217,24 @@ class PDF:
         bottom: float = None,
         left: float = None
     ) -> None:
+        """
+        Sets the margins of document
+        Устанавливает отступы документа
+
+        Args:
+            top (float, optional):
+                The value of the top margin to be set. If not specified, the top margin remains unchanged
+                Значение верхнего поля, которое нужно установить. Если не указано, верхнее поле остается без изменений
+            right (float, optional):
+                The value of the right margin to be set. If not specified, the right margin remains unchanged
+                Значение правого поля, которое нужно установить. Если не указано, правое поле остается без изменений
+            bottom (float, optional):
+                The value of the bottom margin to be set. If not specified, the bottom margin remains unchanged
+                Значение нижнего поля, которое нужно установить. Если не указано, нижнее поле остается без изменений
+            left (float, optional):
+                The value of the left margin to be set. If not specified, the left margin remains unchanged
+                Значение левого поля, которое нужно установить. Если не указано, левое поле остается без изменений
+        """
         if top is not None:
             self.set_margin_top(top)
         if right is not None:
@@ -128,20 +246,47 @@ class PDF:
 
     def set_line_spacing(
         self,
-        spacing_k: float
+        spacing_k: float = 1
     ) -> None:
+        """
+        Sets the line spacing of document
+        Устанавливает межстрочный интервал документа
+
+        Args:
+            spacing_k (float):
+                The line spacing factor to be set. Single interval by default
+                Фактор межстрочного интервала, который нужно установить. По умолчанию одинарный интервал
+        """
         self.__line_spacing = spacing_k
 
     def set_paragraph_spacing(
         self,
-        spacing_k: float
+        spacing_k: float = 1
     ) -> None:
+        """
+        Sets the paragraph spacing of document
+        Устанавливает интервал между абзацами документа
+
+        Args:
+            spacing_k (float):
+                The paragraph spacing factor to be set. Single interval by default
+                Фактор интервала между абзацами, который нужно установить. По умолчанию одинарный интервал
+        """
         self.__paragraph_spacing = spacing_k
 
     def set_fixed_paragraph_spacing(
         self,
         spacing: float = None
     ) -> None:
+        """
+        Sets the fixed paragraph spacing of document
+        Фиксирует интервал между абзацами документа
+
+        Args:
+            spacing (float, optional):
+                The fixed spacing value to be set. If not specified, removes the fixed interval
+                Значение фиксированного интервала, которое нужно установить. Если не указано, убирает фиксированный интервал
+        """
         if spacing is not None:
             self.__fixed_paragraph_spacing = spacing
         else:
@@ -158,6 +303,36 @@ class PDF:
         italic: bool = None,
         underline: bool = None
     ) -> None:
+        """
+        Adds a paragraph to document
+        Добавляет параграф в документ
+
+        Args:
+            text (str):
+                The text content of the paragraph
+                Текстовое содержимое абзаца
+            spacing (float, optional):
+                The spacing to be added before the paragraph. If not specified, default settings are used
+                Интервал, добавляемый перед абзацем. Если не указан, используются настройки по умолчанию
+            font_name (str, optional):
+                The name of the font to be used. If not specified, default settings are used
+                Имя используемого шрифта. Если не указано, используются настройки по умолчанию
+            font_size (float, optional):
+                The size of the font. If not specified, default settings are used
+                Размер шрифта. Если не указано, используются настройки по умолчанию
+            alignment (str, optional):
+                The alignment of the text. Can be 'left', 'right', 'center', or 'justify'. If not specified, default settings are used
+                Выравнивание текста. Может быть 'left', 'right', 'center' или 'justify'. Если не указано, используются настройки по умолчанию
+            bold (bool, optional):
+                Whether the text should be bold. If not specified, default settings are used
+                Жирный ли текст. Если не указано, используются настройки по умолчанию
+            italic (bool, optional):
+                Whether the text should be italic. If not specified, default settings are used
+                Курсивный ли текст. Если не указано, используются настройки по умолчанию
+            underline (bool, optional):
+                Whether the text should be underlined. If not specified, default settings are used
+                Подчеркнут ли текст. Если не указано, используются настройки по умолчанию
+        """
         last_font_name = self.__font_name
         last_font_size = self.__font_size
         last_alignment = self.__alignment
@@ -172,6 +347,18 @@ class PDF:
         numbered_list: NumberedList,
         spacing: float = None
     ) -> None:
+        """
+        Adds a numbered list to document
+        Добавляет нумерованный список в документ
+
+        Args:
+            numbered_list (NumberedList):
+                The list object to be added
+                Объект списка, который нужно добавить
+            spacing (float, optional):
+                The interval to add before the start of the list. If not specified, the default settings are used
+                Интервал, добавляемый перед началом списка. Если не указан, используются настройки по умолчанию
+        """
         for i in range(len(numbered_list.data)):
             if i == 0:
                 if spacing is not None:
@@ -204,6 +391,18 @@ class PDF:
         bulleted_list: BulletedList,
         spacing: float = None
     ) -> None:
+        """
+        Adds a bulleted list to document
+        Добавляет маркированный список в документ
+
+        Args:
+            bulleted_list (BulletedList):
+                The list object to be added
+                Объект списка, который нужно добавить
+            spacing (float, optional):
+                The interval to add before the start of the list. If not specified, the default settings are used
+                Интервал, добавляемый перед началом списка. Если не указан, используются настройки по умолчанию
+        """
         for i in range(len(bulleted_list.data)):
             if i == 0:
                 if spacing is not None:
@@ -240,6 +439,30 @@ class PDF:
         text: str = None,
         text_spacing: float = None
     ) -> None:
+        """
+        Adds an image to document
+        Добавляет изображение в документ
+
+        Args:
+            image (Image):
+                The image object to be added
+                Объект изображения, который нужно добавить
+            image_width (float, optional):
+                The width of the image. If not specified, the image retains its original width
+                Ширина изображения. Если не указано, изображение сохраняет свою оригинальную ширину
+            image_height (float, optional):
+                The height of the image. If not specified, the image retains its original height
+                Высота изображения. Если не указано, изображение сохраняет свою оригинальную высоту
+            image_spacing (float, optional):
+                The spacing to be added before the image. If not specified, the default settings are used
+                Интервал, добавляемый перед изображением. Если не указан, используются настройки по умолчанию
+            text (str, optional):
+                The text to be added below the image. If not specified, the text is not added
+                Текст, который нужно добавить под изображением. Если не указан, текст не добавляется
+            text_spacing (float, optional):
+                The spacing to be added before the text. If not specified, the default settings are used
+                Интервал, добавляемый перед текстом. Если не указан, используются настройки по умолчанию
+        """
         width = 0 if image_width is None else image_width
         height = 0 if image_height is None else image_height
         settings = image.settings
@@ -254,6 +477,18 @@ class PDF:
         table: Table,
         spacing: float = None
     ) -> None:
+        """
+        Adds a table to document
+        Добавляет таблицу в документ
+
+        Args:
+            table (Table):
+                The table object to be added
+                Объект таблицы, который нужно добавить
+            spacing (float, optional):
+                The spacing to be added before the table. If not specified, the default settings are used
+                Интервал, добавляемый перед таблицей. Если не указан, используются настройки по умолчанию
+        """
         self.add_spacing(spacing)
         with self.__pdf.table(first_row_as_headings=False) as t:
             for i in range(len(table.data)):
@@ -273,6 +508,15 @@ class PDF:
         self,
         spacing: float = None
     ) -> None:
+        """
+        Adds spacing to document
+        Добавляет интервал в документ
+
+        Args:
+            spacing (float, optional):
+                The interval to be added. If not specified, the default settings are used
+                Добавляемый интервал. Если не указан, используются настройки по умолчанию
+        """
         self.__pdf.set_x(self.__pdf.l_margin)
         if spacing is not None:
             self.__pdf.set_y(self.__pdf.get_y() + spacing)
@@ -286,9 +530,18 @@ class PDF:
 
     def save(
         self,
-        filename: str
+        file_path: str
     ) -> None:
-        self.__pdf.output(filename)
+        """
+        Saves document to a file
+        Сохраняет документ в файл
+
+        Args:
+            file_path (str):
+                The path to the file to save
+                Путь к файлу для сохранения
+        """
+        self.__pdf.output(file_path)
 
     @staticmethod
     def _make_alignment(
