@@ -1,5 +1,5 @@
 from docx import Document
-from docx.shared import Pt, Inches
+from docx.shared import Pt, Cm
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.style import WD_STYLE_TYPE
 from .structs import Table, NumberedList, BulletedList, Image
@@ -157,7 +157,7 @@ class DOCX:
                 Значение верхнего поля, которое нужно установить
         """
         for section in self.__docx.sections:
-            section.top_margin = top
+            section.top_margin = Cm(top)
 
     def set_margin_right(
         self,
@@ -173,7 +173,7 @@ class DOCX:
                 Значение правого поля, которое нужно установить
         """
         for section in self.__docx.sections:
-            section.right_margin = right
+            section.right_margin = Cm(right)
 
     def set_margin_bottom(
         self,
@@ -189,7 +189,7 @@ class DOCX:
                 Значение нижнего поля, которое нужно установить
         """
         for section in self.__docx.sections:
-            section.bottom_margin = bottom
+            section.bottom_margin = Cm(bottom)
 
     def set_margin_left(
         self,
@@ -205,7 +205,7 @@ class DOCX:
                 Значение левого поля, которое нужно установить
         """
         for section in self.__docx.sections:
-            section.left_margin = left
+            section.left_margin = Cm(left)
 
     def set_margin(
         self,

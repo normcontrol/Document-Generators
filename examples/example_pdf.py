@@ -3,6 +3,8 @@ from docs.structs import Settings, Image, Table, NumberedList, BulletedList
 
 pdf = PDF()
 
+pdf.set_margin(1, 3, 1, 1.25)
+
 main_settings = Settings(
     font_name="Arial",
     font_size=14,
@@ -44,7 +46,7 @@ table.set_settings(1, 1, cell_settings)
 table.set_settings(2, 2, cell_settings)
 pdf.add_table(table)
 
-list_settings = Settings(bold=True, font_size=20, alignment="center")
+list_settings = Settings(bold=True, italic=True)
 
 numbered_list = NumberedList(
     [

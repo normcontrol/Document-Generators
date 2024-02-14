@@ -26,6 +26,7 @@ class PDF:
         self.__paragraph_spacing = 1
         self.__first_addition = True
         self.__fixed_paragraph_spacing = None
+        self.__cm_k = 10
         self.__pdf.add_page()
 
     def set_font_name(
@@ -163,7 +164,7 @@ class PDF:
                 The value of the top margin to be set
                 Значение верхнего поля, которое нужно установить
         """
-        self.__pdf.set_top_margin(top)
+        self.__pdf.set_top_margin(top * self.__cm_k)
 
     def set_margin_right(
         self,
@@ -178,7 +179,7 @@ class PDF:
                 The value of the right margin to be set
                 Значение правого поля, которое нужно установить
         """
-        self.__pdf.set_right_margin(right)
+        self.__pdf.set_right_margin(right * self.__cm_k)
 
     def set_margin_bottom(
         self,
@@ -193,7 +194,7 @@ class PDF:
                 The value of the bottom margin to be set
                 Значение нижнего поля, которое нужно установить
         """
-        self.__pdf.set_auto_page_break(True, bottom)
+        self.__pdf.set_auto_page_break(True, bottom * self.__cm_k)
 
     def set_margin_left(
         self,
@@ -208,7 +209,7 @@ class PDF:
                 The value of the left margin to be set
                 Значение левого поля, которое нужно установить
         """
-        self.__pdf.set_left_margin(left)
+        self.__pdf.set_left_margin(left * self.__cm_k)
 
     def set_margin(
         self,
@@ -377,12 +378,15 @@ class PDF:
             last_alignment = self.__alignment
             last_font_styles = self.__font_styles.copy()
             settings = numbered_list.settings[i]
-            self.set_settings(**settings.get())
             if settings.alignment is None:
                 align = self.__alignment
             else:
                 align = settings.alignment
+            self.__pdf.set_x(self.__pdf.get_x() + numbered_list.indent * self.__cm_k)
+            self.set_settings(**numbered_list.number_settings.get())
             self.__pdf.cell(text=index, align=self._make_alignment(align))
+            self.set_settings(last_font_name, last_font_size, last_alignment, **last_font_styles)
+            self.set_settings(**settings.get())
             self.__pdf.multi_cell(w=0, text=text, align=self._make_alignment(align))
             self.set_settings(last_font_name, last_font_size, last_alignment, **last_font_styles)
 
@@ -426,7 +430,11 @@ class PDF:
                 align = self.__alignment
             else:
                 align = settings.alignment
+            self.__pdf.set_x(self.__pdf.get_x() + bulleted_list.indent * self.__cm_k)
+            self.set_settings(**bulleted_list.bullet_settings.get())
             self.__pdf.cell(text=index, align=self._make_alignment(align))
+            self.set_settings(last_font_name, last_font_size, last_alignment, **last_font_styles)
+            self.set_settings(**settings.get())
             self.__pdf.multi_cell(w=0, text=text, align=self._make_alignment(align))
             self.set_settings(last_font_name, last_font_size, last_alignment, **last_font_styles)
 

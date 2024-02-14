@@ -9,7 +9,7 @@ class BulletedList:
         settings: List[Settings] = None,
         bullet_string: str = "-",
         bullet_settings: Settings = None,
-        indent: float = 10,
+        indent: float = 1,
         between_spacing: float = None
     ):
         """
@@ -30,8 +30,8 @@ class BulletedList:
                 A list of Settings objects to customize the appearance of the bullets. If not specified, the default settings are used
                 Список объектов Settings для настройки внешнего вида маркировки. Если не указан, используются настройки по умолчанию
             indent (float, optional):
-                The indentation of list items from the left edge of the page. Defaults to 10
-                Отступ элементов списка от левого края страницы. По умолчанию 10
+                The indentation of list items from the left edge of the page. Defaults to 1
+                Отступ элементов списка от левого края страницы. По умолчанию 1
             between_spacing (float, optional):
                 Vertical spacing between list items. If not specified, default settings are used
                 Вертикальный интервал между элементами списка. Если не указан, используются настройки по умолчанию
