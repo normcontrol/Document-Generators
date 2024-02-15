@@ -1,6 +1,7 @@
 package com.generator.pdf;
 
 import java.util.Scanner;
+import com.itextpdf.layout.properties.HorizontalAlignment;
 
 public class ContentController {
     private final PdfGenerator pdfGenerator;
@@ -71,6 +72,23 @@ public class ContentController {
                 case "f4":
                     pdfGenerator.finalizeTable();
                     System.out.println("Таблица завершена.");
+                    break;
+                case "img":
+                    System.out.println("Для вставки изображения необходимо ввести команду в формате: img <путь к изображению> <ширина> <высота>");
+                    String[] params = content.split(" ");
+                    if(params.length >= 3) {
+                        try {
+                            String imagePath = params[0];
+                            float width = Float.parseFloat(params[1]);
+                            float height = Float.parseFloat(params[2]);
+                            pdfGenerator.addImage(imagePath, width, height, HorizontalAlignment.CENTER);
+                            System.out.println("Изображение добавлено.");
+                        } catch (Exception e) {
+                            System.err.println("Ошибка при добавлении изображения: " + e.getMessage());
+                        }
+                    } else {
+                        System.out.println("Недостаточно параметров для добавления изображения.");
+                    }
                     break;
                 // TODO: обработка других кодов
             }

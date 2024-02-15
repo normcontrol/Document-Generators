@@ -30,7 +30,7 @@ public class Main {
         GostTranslator translator = new GostTranslator(gostDetails);
 
         try {
-            PdfGenerator pdfGenerator = new PdfGenerator("docs/custom_document_type4.pdf");
+            PdfGenerator pdfGenerator = new PdfGenerator("docs/custom_document_type5.pdf");
             ContentController contentController = new ContentController(pdfGenerator, translator);
             contentController.start();
             System.out.println("PDF document has been generated.");

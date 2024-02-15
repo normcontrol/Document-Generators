@@ -13,6 +13,10 @@ import com.itextpdf.layout.element.List;
 import com.itextpdf.layout.element.ListItem;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.element.Image;
+import com.itextpdf.layout.properties.HorizontalAlignment;
+import com.itextpdf.io.image.ImageData;
+import com.itextpdf.io.image.ImageDataFactory;
 
 public class PdfGenerator {
     private String tableCaption = null;
@@ -123,6 +127,12 @@ public class PdfGenerator {
         }
     }
 
+    public void addImage(String imagePath, float width, float height, HorizontalAlignment alignment) throws IOException {
+        ImageData data = ImageDataFactory.create(imagePath);
+        Image image = new Image(data).setWidth(width).setHeight(height).setHorizontalAlignment(alignment);
+        document.add(image);
+        logger.info("Добавлено изображение: " + imagePath);
+    }
 
     public void closeDocument() {
         finalizeList();
