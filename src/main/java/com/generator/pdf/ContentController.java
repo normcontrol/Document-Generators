@@ -19,19 +19,16 @@ public class ContentController {
             handleCommand(line);
         }
 
+        pdfGenerator.finalizeList();
         pdfGenerator.closeDocument();
         System.out.println("PDF document has been generated.");
     }
 
     private void handleCommand(String commandLine) {
-        String[] parts = commandLine.split(" ", 2);
-        if (parts.length != 2) {
-            System.out.println("Invalid command format. Use 'code content'.");
-            return;
-        }
+        String[] parts = commandLine.trim().split(" ", 2);
+        String code = parts[0];
 
-        String code = parts[0].trim();
-        String content = parts[1].trim();
+        String content = parts.length > 1 ? parts[1] : "";
 
         try {
             switch (code) {
@@ -42,14 +39,22 @@ public class ContentController {
                     pdfGenerator.addHeading(content, translator, 2);
                     break;
                 case "c1":
-                case "c2":
                     pdfGenerator.addParagraph(content, translator);
                     break;
+                case "c2":
                 case "d2":
-                    // TODO: список
-                    System.out.println("List items are not implemented yet.");
+                    if (!content.isEmpty()) {
+                        pdfGenerator.addListItem(content);
+                        System.out.println("Элемент списка добавлен. Для завершения списка введите 'd3'.");
+                    } else {
+                        System.out.println("Для добавления элемента списка введите 'd2 (текст элемента)'.");
+                    }
                     break;
-                    // TODO: обработка других кодов
+                case "d3":
+                    pdfGenerator.finalizeList();
+                    System.out.println("Список завершен.");
+                    break;
+                // TODO: обработка других кодов
                 default:
                     System.out.println("Unknown command code: " + code);
                     break;
@@ -58,4 +63,5 @@ public class ContentController {
             System.err.println("Error processing command '" + commandLine + "': " + e.getMessage());
         }
     }
+
 }

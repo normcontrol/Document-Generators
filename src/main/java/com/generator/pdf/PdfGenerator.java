@@ -9,8 +9,11 @@ import com.itextpdf.kernel.font.PdfFont;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.IOException;
+import com.itextpdf.layout.element.List;
+import com.itextpdf.layout.element.ListItem;
 
 public class PdfGenerator {
+    private List list;
     private Document document;
     private static final Logger logger = LoggerFactory.getLogger(PdfGenerator.class);
 
@@ -51,6 +54,25 @@ public class PdfGenerator {
                 .setTextAlignment(TextAlignment.JUSTIFIED);
 
         document.add(paragraph);
+    }
+
+    private void startNewList() {
+        if (this.list == null) {
+            this.list = new List();
+        }
+    }
+
+    public void addListItem(String content) throws IOException {
+        startNewList();
+        ListItem listItem = new ListItem(content);
+        this.list.add(listItem);
+    }
+
+    public void finalizeList() {
+        if (this.list != null && !this.list.isEmpty()) {
+            document.add(this.list);
+            this.list = new List();
+        }
     }
 
     public void closeDocument() {
