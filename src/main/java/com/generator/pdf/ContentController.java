@@ -74,20 +74,23 @@ public class ContentController {
                     System.out.println("Таблица завершена.");
                     break;
                 case "img":
-                    System.out.println("Для вставки изображения необходимо ввести команду в формате: img <путь к изображению> <ширина> <высота>");
-                    String[] params = content.split(" ");
-                    if(params.length >= 3) {
+                    if (content.isEmpty() || content.split(" ").length < 4) {
+                        System.out.println("Для вставки изображения необходимо передать параметры в формате: img <путь к изображению> <ширина> <высота> <выравнивание>");
+                        System.out.println("Доступные значения для выравнивания: left, center, right");
+                        System.out.println("Пример: img /path/to/image.jpg 200 100 center");
+                    } else {
+                        String[] params = content.split(" ");
                         try {
                             String imagePath = params[0];
                             float width = Float.parseFloat(params[1]);
                             float height = Float.parseFloat(params[2]);
-                            pdfGenerator.addImage(imagePath, width, height, HorizontalAlignment.CENTER);
-                            System.out.println("Изображение добавлено.");
+                            String alignment = params[3].toLowerCase();
+
+                            pdfGenerator.addImage(imagePath, width, height, alignment);
+                            System.out.println("Изображение добавлено с выравниванием: " + alignment);
                         } catch (Exception e) {
                             System.err.println("Ошибка при добавлении изображения: " + e.getMessage());
                         }
-                    } else {
-                        System.out.println("Недостаточно параметров для добавления изображения.");
                     }
                     break;
                 // TODO: обработка других кодов

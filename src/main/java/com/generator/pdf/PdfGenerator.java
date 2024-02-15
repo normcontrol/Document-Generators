@@ -127,11 +127,32 @@ public class PdfGenerator {
         }
     }
 
-    public void addImage(String imagePath, float width, float height, HorizontalAlignment alignment) throws IOException {
+    public void addImage(String imagePath, float width, float height, String alignmentStr) throws IOException {
         ImageData data = ImageDataFactory.create(imagePath);
-        Image image = new Image(data).setWidth(width).setHeight(height).setHorizontalAlignment(alignment);
+        Image image = new Image(data);
+
+        if (width > 0 && height > 0) {
+            image.setWidth(width);
+            image.setHeight(height);
+        }
+
+        switch (alignmentStr) {
+            case "left":
+                image.setHorizontalAlignment(HorizontalAlignment.LEFT);
+                break;
+            case "center":
+                image.setHorizontalAlignment(HorizontalAlignment.CENTER);
+                break;
+            case "right":
+                image.setHorizontalAlignment(HorizontalAlignment.RIGHT);
+                break;
+            default:
+                System.out.println("Неизвестное выравнивание. Используется выравнивание по умолчанию.");
+                image.setHorizontalAlignment(HorizontalAlignment.CENTER);
+        }
+
         document.add(image);
-        logger.info("Добавлено изображение: " + imagePath);
+        logger.info("Добавлено изображение с выравниванием: " + alignmentStr);
     }
 
     public void closeDocument() {
