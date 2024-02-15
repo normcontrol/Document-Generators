@@ -30,6 +30,7 @@ class DOCX:
         self.__paragraph_spacing = 1
         self.__first_addition = True
         self.__fixed_paragraph_spacing = None
+        self.__first_addition = True
         self.__increment = 1
 
     def set_font_name(
@@ -491,6 +492,9 @@ class DOCX:
             p_format.space_before = Cm(self.__fixed_paragraph_spacing)
         else:
             p_format.space_before = int(self.__paragraph_spacing * p_font.size)
+        if self.__first_addition:
+            self.__first_addition = False
+            p_format.space_before = 0
         if caption is not None:
             self._add_text(caption, caption_spacing, **settings.get())
 
@@ -553,6 +557,9 @@ class DOCX:
                 cell_p_run.bold = settings.bold or self.__font_styles["bold"]
                 cell_p_run.italic = settings.italic or self.__font_styles["italic"]
                 cell_p_run.underline = settings.underline or self.__font_styles["underline"]
+        if self.__first_addition:
+            self.__first_addition = False
+            p_format.space_before = 0
 
     def add_formula(
         self,
@@ -575,7 +582,6 @@ class DOCX:
                 The spacing to be added before the formula. If not specified, the default settings are used
                 Интервал, добавляемый перед формулой. Если не указан, используются настройки по умолчанию
         """
-
         paragraph = self.__docx.add_paragraph()
         run = paragraph.add_run()
         p_format = paragraph.paragraph_format
@@ -602,6 +608,9 @@ class DOCX:
             f'/2006/math">{omml_output}</p>'
         )
         paragraph._p.append(parse_xml(xml_output)[0])
+        if self.__first_addition:
+            self.__first_addition = False
+            p_format.space_before = 0
 
     def save(
         self,
@@ -646,6 +655,9 @@ class DOCX:
         else:
             p_format.space_before = int(self.__paragraph_spacing * p_font.size)
         p_format.space_after = 0
+        if self.__first_addition:
+            self.__first_addition = False
+            p_format.space_before = 0
 
     @staticmethod
     def _make_alignment(
