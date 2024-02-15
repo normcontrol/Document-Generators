@@ -90,4 +90,11 @@ file.add_bulleted_list(
     spacing=1
 )
 
+file.add_formula(
+    formula="x^n + y^n = z^n",
+    formula_width=6,
+    formula_height=1,
+    formula_alignment="center"
+)
+
 file.save("example_pdf.pdf")

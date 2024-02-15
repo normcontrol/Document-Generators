@@ -1,6 +1,10 @@
 from fpdf import FPDF
 from fpdf.enums import Align
 from fpdf.fonts import FontFace
+from io import BytesIO
+from urllib.parse import quote
+from urllib.request import urlopen
+from matplotlib.figure import Figure
 from .structs import Table, NumberedList, BulletedList, Image
 
 
@@ -529,6 +533,41 @@ class PDF:
                     if params.underline or params.underline is None and self.__font_styles["underline"]:
                         style += "U"
                     row.cell(table.data[i][j], style=FontFace(emphasis=style), align=self._make_alignment(params.alignment or self.__alignment))
+
+    def add_formula(
+        self,
+        formula: str,
+        formula_width: float,
+        formula_height: float,
+        formula_alignment: str = None,
+        spacing: float = None
+    ) -> None:
+        """
+        Adds a formula to document
+        Добавляет формулу в документ
+
+        Args:
+            formula (str):
+                The formula string to be added
+                Строка формулы, которую нужно добавить
+            formula_width (float)
+                The width of the formula in document
+                Ширина формулы в документе
+            formula_height (float)
+                The height of the formula in document
+                Высота формулы в документе
+            formula_alignment (str, optional)
+                The alignment of the formula. Can be 'left', 'right', 'center', or 'justify'. If not specified, default settings are used
+                Выравнивание формулы. Может быть 'left', 'right', 'center' или 'justify'. Если не указано, используются настройки по умолчанию
+            spacing (float, optional):
+                The spacing to be added before the formula. If not specified, the default settings are used
+                Интервал, добавляемый перед формулой. Если не указан, используются настройки по умолчанию
+        """
+        self._add_spacing(spacing)
+        url = f"https://chart.googleapis.com/chart?cht=tx&chs=512&chl={quote(formula)}"
+        with urlopen(url) as img_file:
+            img = BytesIO(img_file.read())
+        self.__pdf.image(img, x=self._make_alignment(formula_alignment), w=formula_width * self.__cm_k, h=formula_height * self.__cm_k)
 
     def _add_spacing(
         self,
