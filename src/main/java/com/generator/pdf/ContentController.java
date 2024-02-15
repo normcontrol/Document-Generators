@@ -54,10 +54,25 @@ public class ContentController {
                     pdfGenerator.finalizeList();
                     System.out.println("Список завершен.");
                     break;
-                // TODO: обработка других кодов
                 default:
                     System.out.println("Unknown command code: " + code);
                     break;
+                case "f1":
+                    int numColumns = Integer.parseInt(content);
+                    pdfGenerator.startTable(numColumns, null);
+                    break;
+                case "f2":
+                    pdfGenerator.setTableCaption(content);
+                    System.out.println("Установлена подпись для следующей таблицы: " + content);
+                    break;
+                case "f3":
+                    pdfGenerator.addCellToTable(content);
+                    break;
+                case "f4":
+                    pdfGenerator.finalizeTable();
+                    System.out.println("Таблица завершена.");
+                    break;
+                // TODO: обработка других кодов
             }
         } catch (Exception e) {
             System.err.println("Error processing command '" + commandLine + "': " + e.getMessage());

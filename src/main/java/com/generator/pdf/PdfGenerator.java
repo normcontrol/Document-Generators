@@ -11,8 +11,12 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import com.itextpdf.layout.element.List;
 import com.itextpdf.layout.element.ListItem;
+import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.element.Cell;
 
 public class PdfGenerator {
+    private String tableCaption = null;
+    private Table currentTable;
     private List list;
     private Document document;
     private static final Logger logger = LoggerFactory.getLogger(PdfGenerator.class);
@@ -75,7 +79,54 @@ public class PdfGenerator {
         }
     }
 
+    public void startTable(int numColumns, String caption) {
+        if (currentTable == null) {
+            currentTable = new Table(numColumns);
+            logger.info("Начата новая таблица с количеством столбцов: " + numColumns);
+
+            if (caption != null && !caption.isEmpty()) {
+                document.add(new Paragraph(caption));
+                logger.info("К таблице добавлена подпись: " + caption);
+            }
+        } else {
+            logger.warn("Попытка начать новую таблицу без завершения текущей.");
+        }
+    }
+
+    public void addCellToTable(String content) {
+        if (currentTable != null) {
+            currentTable.addCell(new Cell().add(new Paragraph(content)));
+            logger.info("В таблицу добавлена ячейка с содержимым: " + content);
+        } else {
+            logger.error("Ошибка: попытка добавить ячейку в неинициализированную таблицу.");
+            System.err.println("Table is not initialized.");
+        }
+    }
+
+    public void setTableCaption(String caption) {
+        this.tableCaption = caption;
+        logger.info("Установлена подпись для таблицы: " + caption);
+    }
+
+    public void finalizeTable() {
+        if (currentTable != null) {
+            document.add(currentTable);
+            if (tableCaption != null && !tableCaption.isEmpty()) {
+                document.add(new Paragraph(tableCaption));
+                logger.info("Под таблицей добавлена подпись: " + tableCaption);
+                tableCaption = null;
+            }
+            currentTable = null;
+            logger.info("Таблица завершена и добавлена в документ.");
+        } else {
+            logger.warn("Попытка завершить несуществующую таблицу.");
+        }
+    }
+
+
     public void closeDocument() {
+        finalizeList();
+        finalizeTable();
         if (document != null) {
             document.close();
             logger.info("PDF document has been closed successfully.");
