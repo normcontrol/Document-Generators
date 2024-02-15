@@ -13,7 +13,7 @@ public class PdfGenerator {
 
     private static final Logger logger = LoggerFactory.getLogger(PdfGenerator.class);
 
-    public void createPdf(String dest, String fontName) {
+    public void createPdf(String dest, String fontName, String customText) {
         try {
             PdfWriter writer = new PdfWriter(dest);
             PdfDocument pdf = new PdfDocument(writer);
@@ -21,13 +21,13 @@ public class PdfGenerator {
 
             PdfFont font = FontMapper.getFont(fontName);
 
-            Paragraph paragraph = new Paragraph("Съешьте ещё этих мягких французских булок, да выпейте чаю.")
+            Paragraph paragraph = new Paragraph(customText)
                     .setFont(font)
                     .setFontSize(12);
             document.add(paragraph);
 
             document.close();
-            logger.info("PDF document has been generated successfully.");
+            logger.info("PDF document with custom text has been generated successfully.");
         } catch (IOException e) {
             logger.error("Error while generating PDF: {}", e.getMessage());
         }

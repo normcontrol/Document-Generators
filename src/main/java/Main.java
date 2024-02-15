@@ -15,29 +15,25 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         String format = scanner.nextLine().toUpperCase();
 
-        switch (format) {
-            case "PDF":
-                Map<String, Object> gostDetails = GostSelector.selectGost();
-                if (gostDetails != null) {
-                    logger.info("Selected GOST details: {}", gostDetails);
+        if ("PDF".equals(format)) {
+            Map<String, Object> gostDetails = GostSelector.selectGost();
+            if (gostDetails != null) {
+                logger.info("Selected GOST details: {}", gostDetails);
 
-                    GostTranslator translator = new GostTranslator(gostDetails);
 
-                    PdfGenerator pdfGenerator = new PdfGenerator();
-                    pdfGenerator.createPdf("docs/document.pdf", translator.getFontName());
-                    System.out.println("PDF document has been generated.");
-                } else {
-                    System.out.println("PDF generation was cancelled due to GOST selection failure.");
-                }
-                break;
-            case "ODT":
-            case "DOCX":
-                System.out.println(format + " format support is TODO.");
-                break;
-            default:
-                System.out.println("Unknown format: " + format);
-                break;
+                System.out.println("Enter the text for your document:");
+                String customText = scanner.nextLine();
+
+                GostTranslator translator = new GostTranslator(gostDetails);
+
+                PdfGenerator pdfGenerator = new PdfGenerator();
+                pdfGenerator.createPdf("docs/custom_document.pdf", translator.getFontName(), customText);
+                System.out.println("PDF document with custom text has been generated.");
+            } else {
+                System.out.println("PDF generation was cancelled due to GOST selection failure.");
+            }
+        } else {
+            System.out.println(format + " format support is TODO.");
         }
     }
 }
-
