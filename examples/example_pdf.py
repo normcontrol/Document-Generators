@@ -1,5 +1,5 @@
 from docs import PDF
-from docs.structs import Settings, Image, Table, NumberedList, BulletedList
+from docs.structs import Settings, Image, Table, NumberedList, BulletedList, Formula
 
 file = PDF()
 
@@ -90,10 +90,13 @@ file.add_bulleted_list(
     spacing=1
 )
 
+formula_settings = Settings(italic=True, underline=True)
+formula = Formula(
+    formula="x^n + y^n = z^n"
+)
+formula.set_settings(formula_settings)
 file.add_formula(
-    formula="x^n + y^n = z^n",
-    formula_width=6,
-    formula_height=1,
+    formula=formula,
     formula_alignment="center"
 )
 

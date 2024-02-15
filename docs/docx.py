@@ -2,7 +2,10 @@ from docx import Document
 from docx.shared import Pt, Cm
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.style import WD_STYLE_TYPE
-from .structs import Table, NumberedList, BulletedList, Image
+from docx.oxml import parse_xml
+from latex2mathml.converter import convert
+import mathml2omml
+from .structs import Table, NumberedList, BulletedList, Image, Formula
 
 
 class DOCX:
@@ -551,6 +554,55 @@ class DOCX:
                 cell_p_run.italic = settings.italic or self.__font_styles["italic"]
                 cell_p_run.underline = settings.underline or self.__font_styles["underline"]
 
+    def add_formula(
+        self,
+        formula: Formula,
+        formula_alignment: str = None,
+        spacing: float = None
+    ) -> None:
+        """
+        Adds a formula to document
+        Добавляет формулу в документ
+
+        Args:
+            formula (str):
+                The formula string to be added
+                Строка формулы, которую нужно добавить
+            formula_alignment (str, optional)
+                The alignment of the formula. Can be 'left', 'right', 'center', or 'justify'. If not specified, default settings are used
+                Выравнивание формулы. Может быть 'left', 'right', 'center' или 'justify'. Если не указано, используются настройки по умолчанию
+            spacing (float, optional):
+                The spacing to be added before the formula. If not specified, the default settings are used
+                Интервал, добавляемый перед формулой. Если не указан, используются настройки по умолчанию
+        """
+
+        paragraph = self.__docx.add_paragraph()
+        run = paragraph.add_run()
+        p_format = paragraph.paragraph_format
+        p_font = run.font
+        p_format.space_after = 0
+        if spacing is not None:
+            p_format.space_before = Cm(spacing)
+        elif self.__fixed_paragraph_spacing is not None:
+            p_format.space_before = Cm(self.__fixed_paragraph_spacing)
+        else:
+            p_format.space_before = int(self.__paragraph_spacing * p_font.size)
+        settings = formula.settings
+        p_font.name = settings.font_name or self.__font_name
+        p_font.size = Pt(settings.font_size or self.__font_size)
+        p_format.alignment = self._make_alignment(formula_alignment or self.__alignment)
+        run.bold = settings.bold or self.__font_styles["bold"]
+        run.italic = settings.italic or self.__font_styles["italic"]
+        run.underline = settings.underline or self.__font_styles["underline"]
+        p_font.math = True
+        mathml_output = convert(formula.formula)
+        omml_output = mathml2omml.convert(mathml_output)
+        xml_output = (
+            f'<p xmlns:m="http://schemas.openxmlformats.org/officeDocument'
+            f'/2006/math">{omml_output}</p>'
+        )
+        paragraph._p.append(parse_xml(xml_output)[0])
+
     def save(
         self,
         file_path: str
@@ -592,7 +644,6 @@ class DOCX:
         elif self.__fixed_paragraph_spacing is not None:
             p_format.space_before = Cm(self.__fixed_paragraph_spacing)
         else:
-            print(int(self.__paragraph_spacing * p_font.size))
             p_format.space_before = int(self.__paragraph_spacing * p_font.size)
         p_format.space_after = 0
 

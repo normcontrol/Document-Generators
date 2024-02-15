@@ -1,5 +1,5 @@
 from docs import DOCX
-from docs.structs import Settings, Image, Table, NumberedList, BulletedList
+from docs.structs import Settings, Image, Table, NumberedList, BulletedList, Formula
 
 file = DOCX()
 
@@ -88,6 +88,16 @@ bulleted_list.set_bullet_settings(list_settings)
 file.add_bulleted_list(
     bulleted_list=bulleted_list,
     spacing=1
+)
+
+formula_settings = Settings(italic=True, underline=True)
+formula = Formula(
+    formula="x^n + y^n = z^n"
+)
+formula.set_settings(formula_settings)
+file.add_formula(
+    formula=formula,
+    formula_alignment="center"
 )
 
 file.save("example_docx.docx")
