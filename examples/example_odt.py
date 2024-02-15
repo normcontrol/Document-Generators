@@ -3,7 +3,7 @@ from docs.structs import Settings, Image, Table, NumberedList, BulletedList, For
 
 file = ODT()
 
-file.set_margin(top=10, right=3, bottom=1, left=1.25)
+file.set_margin(top=1, right=3, bottom=1, left=1.25)
 
 main_settings = Settings(
     font_name="Arial",
