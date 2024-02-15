@@ -1,9 +1,9 @@
-from docs import PDF
+from docs import ODT
 from docs.structs import Settings, Image, Table, NumberedList, BulletedList, Formula
 
-file = PDF()
+file = ODT()
 
-file.set_margin(top=1, right=3, bottom=1, left=1.25)
+file.set_margin(top=10, right=3, bottom=1, left=1.25)
 
 main_settings = Settings(
     font_name="Arial",
@@ -31,7 +31,7 @@ image_settings = Settings(font_size=10, alignment="center", underline=True)
 
 image = Image("square.jpeg")
 image.set_settings(image_settings)
-file.add_image(
+"""file.add_image(
     image=image,
     image_width=10,
     image_height=6,
@@ -39,7 +39,7 @@ file.add_image(
     image_spacing=1,
     caption="This is a square",
     caption_spacing=0.1
-)
+)"""
 
 cell_settings = Settings(italic=True, bold=True, alignment="center")
 
@@ -49,12 +49,12 @@ table = Table([
 ])
 table.set_settings(1, 1, cell_settings)
 table.set_settings(2, 2, cell_settings)
-file.add_table(
+"""file.add_table(
     table=table,
     table_width=15,
     table_height=1,
     table_alignment="center"
-)
+)"""
 
 list_settings = Settings(bold=True, italic=True)
 
@@ -70,10 +70,10 @@ numbered_list = NumberedList(
     between_spacing=0.1
 )
 numbered_list.set_number_settings(list_settings)
-file.add_numbered_list(
+"""file.add_numbered_list(
     numbered_list=numbered_list,
     spacing=1
-)
+)"""
 
 bulleted_list = BulletedList(
     data=[
@@ -85,19 +85,19 @@ bulleted_list = BulletedList(
     indent=1.25
 )
 bulleted_list.set_bullet_settings(list_settings)
-file.add_bulleted_list(
+"""file.add_bulleted_list(
     bulleted_list=bulleted_list,
     spacing=1
-)
+)"""
 
 formula_settings = Settings(italic=True, underline=True)
 formula = Formula(
     formula="x^n + y^n = z^n"
 )
 formula.set_settings(formula_settings)
-file.add_formula(
+"""file.add_formula(
     formula=formula,
     formula_alignment="center"
-)
+)"""
 
-file.save("example_pdf.pdf")
+file.save("example_odt.odt")

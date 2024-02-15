@@ -2,7 +2,10 @@ from docx import Document
 from docx.shared import Pt, Cm
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.style import WD_STYLE_TYPE
-from .structs import Table, NumberedList, BulletedList, Image
+from docx.oxml import parse_xml
+from latex2mathml.converter import convert
+import mathml2omml
+from .structs import Table, NumberedList, BulletedList, Image, Formula
 
 
 class DOCX:
@@ -27,6 +30,7 @@ class DOCX:
         self.__paragraph_spacing = 1
         self.__first_addition = True
         self.__fixed_paragraph_spacing = None
+        self.__first_addition = True
         self.__increment = 1
 
     def set_font_name(
@@ -363,7 +367,8 @@ class DOCX:
         self.__docx.styles.add_style(style_name, WD_STYLE_TYPE.PARAGRAPH)
         self.__docx.styles[style_name].base_style = self.__docx.styles["List Number"]
         self.__docx.styles[style_name].paragraph_format.number_format = numbered_list.number_string.replace("{i}", "\t")
-        self.__docx.styles[style_name].paragraph_format.first_line_indent = numbered_list.indent
+        self.__docx.styles[style_name].paragraph_format.left_indent = Cm(numbered_list.indent)
+        self.__docx.styles[style_name].paragraph_format.first_line_indent = 0
         ns = numbered_list.number_settings
         self.__docx.styles[style_name].font.name = ns.font_name or self.__font_name
         self.__docx.styles[style_name].font.size = Pt(ns.font_size or self.__font_size)
@@ -409,7 +414,8 @@ class DOCX:
         self.__increment += 1
         self.__docx.styles.add_style(style_name, WD_STYLE_TYPE.PARAGRAPH)
         self.__docx.styles[style_name].base_style = self.__docx.styles["List Bullet"]
-        self.__docx.styles[style_name].paragraph_format.first_line_indent = bulleted_list.indent
+        self.__docx.styles[style_name].paragraph_format.left_indent = Cm(bulleted_list.indent)
+        self.__docx.styles[style_name].paragraph_format.first_line_indent = 0
         bs = bulleted_list.bullet_settings
         self.__docx.styles[style_name].font.name = bs.font_name or self.__font_name
         self.__docx.styles[style_name].font.size = Pt(bs.font_size or self.__font_size)
@@ -433,6 +439,178 @@ class DOCX:
                 **bulleted_list.settings[i].get(),
                 style=style_name
             )
+
+    def add_image(
+        self,
+        image: Image,
+        image_width,
+        image_height,
+        image_alignment: str = None,
+        image_spacing: float = None,
+        caption: str = None,
+        caption_spacing: float = None
+    ) -> None:
+        """
+        Adds an image to document
+        Добавляет изображение в документ
+
+        Args:
+            image (Image):
+                The image object to be added
+                Объект изображения, который нужно добавить
+            image_width (float):
+                The width of the image in document
+                Ширина изображения в документе
+            image_height (float):
+                The height of the image in document
+                Высота изображения в документе
+            image_alignment (str, optional):
+                The alignment of the image. Can be 'left', 'right', 'center', or 'justify'. If not specified, default settings are used
+                Выравнивание изображения. Может быть 'left', 'right', 'center' или 'justify'. Если не указано, используются настройки по умолчанию
+            image_spacing (float, optional):
+                The spacing to be added before the image. If not specified, the default settings are used
+                Интервал, добавляемый перед изображением. Если не указан, используются настройки по умолчанию
+            caption (str, optional):
+                The text to be added below the image. If not specified, the text is not added
+                Текст, который нужно добавить под изображением. Если не указан, текст не добавляется
+            caption_spacing (float, optional):
+                The spacing to be added before the text. If not specified, the default settings are used
+                Интервал, добавляемый перед текстом. Если не указан, используются настройки по умолчанию
+        """
+        settings = image.settings
+        img_alignment = self.__alignment if image_alignment is None else image_alignment
+        paragraph = self.__docx.add_paragraph()
+        run = paragraph.add_run()
+        run.add_picture(image.image_path, width=Cm(image_width), height=Cm(image_height))
+        p_format = paragraph.paragraph_format
+        p_font = run.font
+        p_format.alignment = self._make_alignment(img_alignment)
+        p_format.space_after = 0
+        if image_spacing is not None:
+            p_format.space_before = Cm(image_spacing)
+        elif self.__fixed_paragraph_spacing is not None:
+            p_format.space_before = Cm(self.__fixed_paragraph_spacing)
+        else:
+            p_format.space_before = int(self.__paragraph_spacing * p_font.size)
+        if self.__first_addition:
+            self.__first_addition = False
+            p_format.space_before = 0
+        if caption is not None:
+            self._add_text(caption, caption_spacing, **settings.get())
+
+    def add_table(
+        self,
+        table: Table,
+        table_width: float,
+        table_height: float,
+        table_alignment: str = None,
+        spacing: float = None
+    ) -> None:
+        """
+        Adds a table to document
+        Добавляет таблицу в документ
+
+        Args:
+            table (Table):
+                The table object to be added
+                Объект таблицы, который нужно добавить
+            table_width (float)
+                The width of the table in document
+                Ширина таблицы в документе
+            table_height (float)
+                The height of the table in document
+                Высота таблицы в документе
+            table_alignment (str, optional)
+                The alignment of the table. Can be 'left', 'right', 'center', or 'justify'. If not specified, default settings are used
+                Выравнивание таблицы. Может быть 'left', 'right', 'center' или 'justify'. Если не указано, используются настройки по умолчанию
+            spacing (float, optional):
+                The spacing to be added before the table. If not specified, the default settings are used
+                Интервал, добавляемый перед таблицей. Если не указан, используются настройки по умолчанию
+        """
+        paragraph = self.__docx.add_paragraph()
+        run = paragraph.add_run()
+        p_format = paragraph.paragraph_format
+        p_font = run.font
+        p_format.space_after = 0
+        if spacing is not None:
+            p_format.space_before = Cm(spacing)
+        elif self.__fixed_paragraph_spacing is not None:
+            p_format.space_before = Cm(self.__fixed_paragraph_spacing)
+        else:
+            p_format.space_before = int(self.__paragraph_spacing * p_font.size)
+        cr_table = self.__docx.add_table(rows=len(table.data), cols=len(table.data[0]))
+        cr_table.style = "Table Grid"
+        cr_table.alignment = self._make_alignment(table_alignment or self.__alignment)
+        for i, row in enumerate(table.data):
+            cr_table.rows[i].height = Cm(table_height) // len(table.data)
+            for j, cell_text in enumerate(table.data[i]):
+                settings = table.settings[i][j]
+                cell = cr_table.cell(i, j)
+                cell.width = Cm(table_width) // len(table.data[0])
+                cell.text = cell_text
+                cell_p_format = cell.paragraphs[0]
+                cell_p_run = cell_p_format.runs[0]
+                cell_p_font = cell_p_run.font
+                cell_p_font.name = settings.font_name or self.__font_name
+                cell_p_font.size = Pt(settings.font_size or self.__font_size)
+                cell_p_format.alignment = self._make_alignment(settings.alignment or self.__alignment)
+                cell_p_run.bold = settings.bold or self.__font_styles["bold"]
+                cell_p_run.italic = settings.italic or self.__font_styles["italic"]
+                cell_p_run.underline = settings.underline or self.__font_styles["underline"]
+        if self.__first_addition:
+            self.__first_addition = False
+            p_format.space_before = 0
+
+    def add_formula(
+        self,
+        formula: Formula,
+        formula_alignment: str = None,
+        spacing: float = None
+    ) -> None:
+        """
+        Adds a formula to document
+        Добавляет формулу в документ
+
+        Args:
+            formula (str):
+                The formula string to be added
+                Строка формулы, которую нужно добавить
+            formula_alignment (str, optional)
+                The alignment of the formula. Can be 'left', 'right', 'center', or 'justify'. If not specified, default settings are used
+                Выравнивание формулы. Может быть 'left', 'right', 'center' или 'justify'. Если не указано, используются настройки по умолчанию
+            spacing (float, optional):
+                The spacing to be added before the formula. If not specified, the default settings are used
+                Интервал, добавляемый перед формулой. Если не указан, используются настройки по умолчанию
+        """
+        paragraph = self.__docx.add_paragraph()
+        run = paragraph.add_run()
+        p_format = paragraph.paragraph_format
+        p_font = run.font
+        p_format.space_after = 0
+        if spacing is not None:
+            p_format.space_before = Cm(spacing)
+        elif self.__fixed_paragraph_spacing is not None:
+            p_format.space_before = Cm(self.__fixed_paragraph_spacing)
+        else:
+            p_format.space_before = int(self.__paragraph_spacing * p_font.size)
+        settings = formula.settings
+        p_font.name = settings.font_name or self.__font_name
+        p_font.size = Pt(settings.font_size or self.__font_size)
+        p_format.alignment = self._make_alignment(formula_alignment or self.__alignment)
+        run.bold = settings.bold or self.__font_styles["bold"]
+        run.italic = settings.italic or self.__font_styles["italic"]
+        run.underline = settings.underline or self.__font_styles["underline"]
+        p_font.math = True
+        mathml_output = convert(formula.formula)
+        omml_output = mathml2omml.convert(mathml_output)
+        xml_output = (
+            f'<p xmlns:m="http://schemas.openxmlformats.org/officeDocument'
+            f'/2006/math">{omml_output}</p>'
+        )
+        paragraph._p.append(parse_xml(xml_output)[0])
+        if self.__first_addition:
+            self.__first_addition = False
+            p_format.space_before = 0
 
     def save(
         self,
@@ -471,11 +649,15 @@ class DOCX:
         p_font.italic = italic or self.__font_styles["italic"]
         p_font.underline = underline or self.__font_styles["underline"]
         if spacing is not None:
-            p_format.space_before = spacing
+            p_format.space_before = Cm(spacing)
         elif self.__fixed_paragraph_spacing is not None:
-            p_format.space_before = self.__fixed_paragraph_spacing
+            p_format.space_before = Cm(self.__fixed_paragraph_spacing)
         else:
-            p_format.space_before = self.__paragraph_spacing * p_font.size
+            p_format.space_before = int(self.__paragraph_spacing * p_font.size)
+        p_format.space_after = 0
+        if self.__first_addition:
+            self.__first_addition = False
+            p_format.space_before = 0
 
     @staticmethod
     def _make_alignment(

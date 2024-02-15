@@ -1,7 +1,10 @@
 from fpdf import FPDF
 from fpdf.enums import Align
 from fpdf.fonts import FontFace
-from .structs import Table, NumberedList, BulletedList, Image
+from io import BytesIO
+from urllib.parse import quote
+from urllib.request import urlopen
+from .structs import Table, NumberedList, BulletedList, Image, Formula
 
 
 class PDF:
@@ -338,7 +341,7 @@ class PDF:
         last_font_size = self.__font_size
         last_alignment = self.__alignment
         last_font_styles = self.__font_styles.copy()
-        self.add_spacing(spacing)
+        self._add_spacing(spacing)
         self.set_settings(font_name, font_size, alignment, bold, italic, underline)
         self.__pdf.multi_cell(w=0, text=text, align=self._make_alignment(self.__alignment))
         self.set_settings(last_font_name, last_font_size, last_alignment, **last_font_styles)
@@ -372,7 +375,7 @@ class PDF:
                 up_spacing = numbered_list.between_spacing
             index = numbered_list.number_string.replace("{i}", str(numbered_list.number_start + i * numbered_list.number_increment)) + " "
             text = numbered_list.data[i]
-            self.add_spacing(up_spacing)
+            self._add_spacing(up_spacing)
             last_font_name = self.__font_name
             last_font_size = self.__font_size
             last_alignment = self.__alignment
@@ -419,7 +422,7 @@ class PDF:
                 up_spacing = bulleted_list.between_spacing
             index = bulleted_list.bullet_string + " "
             text = bulleted_list.data[i]
-            self.add_spacing(up_spacing)
+            self._add_spacing(up_spacing)
             last_font_name = self.__font_name
             last_font_size = self.__font_size
             last_alignment = self.__alignment
@@ -441,11 +444,12 @@ class PDF:
     def add_image(
         self,
         image: Image,
-        image_width: float = None,
-        image_height: float = None,
+        image_width: float,
+        image_height: float,
+        image_alignment: str = None,
         image_spacing: float = None,
-        text: str = None,
-        text_spacing: float = None
+        caption: str = None,
+        caption_spacing: float = None
     ) -> None:
         """
         Adds an image to document
@@ -455,34 +459,38 @@ class PDF:
             image (Image):
                 The image object to be added
                 Объект изображения, который нужно добавить
-            image_width (float, optional):
-                The width of the image. If not specified, the image retains its original width
-                Ширина изображения. Если не указано, изображение сохраняет свою оригинальную ширину
-            image_height (float, optional):
-                The height of the image. If not specified, the image retains its original height
-                Высота изображения. Если не указано, изображение сохраняет свою оригинальную высоту
+            image_width (float):
+                The width of the image in document
+                Ширина изображения в документе
+            image_height (float):
+                The height of the image in document
+                Высота изображения в документе
+            image_alignment (str, optional):
+                The alignment of the image. Can be 'left', 'right', 'center', or 'justify'. If not specified, default settings are used
+                Выравнивание изображения. Может быть 'left', 'right', 'center' или 'justify'. Если не указано, используются настройки по умолчанию
             image_spacing (float, optional):
                 The spacing to be added before the image. If not specified, the default settings are used
                 Интервал, добавляемый перед изображением. Если не указан, используются настройки по умолчанию
-            text (str, optional):
+            caption (str, optional):
                 The text to be added below the image. If not specified, the text is not added
                 Текст, который нужно добавить под изображением. Если не указан, текст не добавляется
-            text_spacing (float, optional):
+            caption_spacing (float, optional):
                 The spacing to be added before the text. If not specified, the default settings are used
                 Интервал, добавляемый перед текстом. Если не указан, используются настройки по умолчанию
         """
-        width = 0 if image_width is None else image_width
-        height = 0 if image_height is None else image_height
         settings = image.settings
-        img_alignment = self.__alignment if settings.alignment is None else settings.alignment
-        self.add_spacing(image_spacing)
-        self.__pdf.image(image.image_path, x=self._make_alignment(img_alignment), w=width, h=height)
-        if text is not None:
-            self.add_paragraph(text, text_spacing, **settings.get())
+        img_alignment = self.__alignment if image_alignment is None else image_alignment
+        self._add_spacing(image_spacing)
+        self.__pdf.image(image.image_path, x=self._make_alignment(img_alignment), w=image_width * self.__cm_k, h=image_height * self.__cm_k)
+        if caption is not None:
+            self.add_paragraph(caption, caption_spacing, **settings.get())
 
     def add_table(
         self,
         table: Table,
+        table_width: float,
+        table_height: float,
+        table_alignment: str = None,
         spacing: float = None
     ) -> None:
         """
@@ -493,12 +501,25 @@ class PDF:
             table (Table):
                 The table object to be added
                 Объект таблицы, который нужно добавить
+            table_width (float)
+                The width of the table in document
+                Ширина таблицы в документе
+            table_height (float)
+                The height of the table in document
+                Высота таблицы в документе
+            table_alignment (str, optional)
+                The alignment of the table. Can be 'left', 'right', 'center', or 'justify'. If not specified, default settings are used
+                Выравнивание таблицы. Может быть 'left', 'right', 'center' или 'justify'. Если не указано, используются настройки по умолчанию
             spacing (float, optional):
                 The spacing to be added before the table. If not specified, the default settings are used
                 Интервал, добавляемый перед таблицей. Если не указан, используются настройки по умолчанию
         """
-        self.add_spacing(spacing)
-        with self.__pdf.table(first_row_as_headings=False) as t:
+        self._add_spacing(spacing)
+        with self.__pdf.table(
+            first_row_as_headings=False,
+            align=self._make_alignment(table_alignment or self.__alignment),
+            width=table_width * self.__cm_k
+        ) as t:
             for i in range(len(table.data)):
                 row = t.row()
                 for j in range(len(table.data[i])):
@@ -512,7 +533,34 @@ class PDF:
                         style += "U"
                     row.cell(table.data[i][j], style=FontFace(emphasis=style), align=self._make_alignment(params.alignment or self.__alignment))
 
-    def add_spacing(
+    def add_formula(
+        self,
+        formula: Formula,
+        formula_alignment: str = None,
+        spacing: float = None
+    ) -> None:
+        """
+        Adds a formula to document
+        Добавляет формулу в документ
+
+        Args:
+            formula (str):
+                The formula string to be added
+                Строка формулы, которую нужно добавить
+            formula_alignment (str, optional)
+                The alignment of the formula. Can be 'left', 'right', 'center', or 'justify'. If not specified, default settings are used
+                Выравнивание формулы. Может быть 'left', 'right', 'center' или 'justify'. Если не указано, используются настройки по умолчанию
+            spacing (float, optional):
+                The spacing to be added before the formula. If not specified, the default settings are used
+                Интервал, добавляемый перед формулой. Если не указан, используются настройки по умолчанию
+        """
+        self._add_spacing(spacing)
+        url = f"https://chart.googleapis.com/chart?cht=tx&chl={quote(formula.formula)}"
+        with urlopen(url) as img_file:
+            img = BytesIO(img_file.read())
+        self.__pdf.image(img, x=self._make_alignment(formula_alignment or self.__alignment))
+
+    def _add_spacing(
         self,
         spacing: float = None
     ) -> None:
@@ -527,11 +575,11 @@ class PDF:
         """
         self.__pdf.set_x(self.__pdf.l_margin)
         if spacing is not None:
-            self.__pdf.set_y(self.__pdf.get_y() + spacing)
+            self.__pdf.set_y(self.__pdf.get_y() + spacing * self.__cm_k)
         elif self.__fixed_paragraph_spacing is not None:
-            self.__pdf.set_y(self.__pdf.get_y() + self.__fixed_paragraph_spacing)
+            self.__pdf.set_y(self.__pdf.get_y() + self.__fixed_paragraph_spacing * self.__cm_k)
         else:
-            self.__pdf.set_y(self.__pdf.get_y() + self.__paragraph_spacing * self.__pdf.font_size)
+            self.__pdf.set_y(self.__pdf.get_y() + self.__paragraph_spacing * self.__pdf.font_size * self.__cm_k)
         if self.__first_addition:
             self.__first_addition = False
             self.__pdf.set_y(self.__pdf.t_margin)
