@@ -34,13 +34,13 @@ public class Main {
         try {
             switch (format) {
                 case "PDF":
-                    PdfGenerator pdfGenerator = new PdfGenerator("docs/custom_document.pdf");
+                    PdfGenerator pdfGenerator = new PdfGenerator("docs/PdfExample.pdf");
                     ContentController contentController = new ContentController(pdfGenerator, translator);
                     contentController.start();
                     System.out.println("PDF document has been generated.");
                     break;
                 case "DOCX":
-                    DocxGenerator docxGenerator = new DocxGenerator("docs/custom_document.docx");
+                    DocxGenerator docxGenerator = new DocxGenerator("docs/DocxExample.docx");
                     ContentControllerDocx contentControllerDocx = new ContentControllerDocx(docxGenerator, translator);
                     contentControllerDocx.start();
                     System.out.println("DOCX document has been generated.");
