@@ -1,6 +1,12 @@
 package com.generator.pdf;
 
 import java.util.Scanner;
+import java.nio.file.Path;
+import java.nio.file.Files;
+import java.io.IOException;
+import java.awt.image.BufferedImage;
+
+
 import com.itextpdf.layout.properties.HorizontalAlignment;
 
 public class ContentController {
@@ -93,7 +99,25 @@ public class ContentController {
                         }
                     }
                     break;
-                // TODO: обработка других кодов
+                case "latex":
+                    if (content.isEmpty()) {
+                        System.out.println("Необходимо предоставить LaTeX формулу.");
+                    } else {
+                        try {
+                            BufferedImage latexImage = LaTeXToImage.latexToImage(content);
+                            Path tempImagePath = LaTeXToImage.saveImageToFile(latexImage);
+
+                            String alignmentStr = "center";
+
+                            pdfGenerator.addImage(tempImagePath.toString(), 70, 50, alignmentStr);
+                            System.out.println("Формула добавлена в документ.");
+
+                            Files.delete(tempImagePath);
+                        } catch (IOException e) {
+                            System.err.println("Ошибка при создании изображения из LaTeX: " + e.getMessage());
+                        }
+                    }
+                    break;
             }
         } catch (Exception e) {
             System.err.println("Error processing command '" + commandLine + "': " + e.getMessage());
