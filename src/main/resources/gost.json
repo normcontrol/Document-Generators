@@ -1,0 +1,35 @@
+{
+  "ГОСТ_7.32-2017": {
+    "fontName": "Times New Roman",
+    "fontSize": 12,
+    "margins": {
+      "left": 25,
+      "right": 10,
+      "top": 20,
+      "bottom": 20
+    },
+    "alignment": {
+      "header1": "center",
+      "header2": "left",
+      "text": "justify"
+    },
+    "lineSpacing": "1.5",
+    "paragraphIndent": "1.25",
+    "list": {
+      "listItemIndent": "1.25",
+      "listMarkerType": "number"
+    },
+    "table": {
+      "border": "1",
+      "padding": "3"
+    },
+    "figure": {
+      "captionAlignment": "center",
+      "captionPrefix": "Рисунок"
+    },
+    "footnote": {
+      "fontSize": 10,
+      "alignment": "justify"
+    }
+  }
+}
