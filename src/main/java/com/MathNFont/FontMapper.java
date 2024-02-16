@@ -1,4 +1,4 @@
-package com.generator.pdf;
+package com.MathNFont;
 
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;

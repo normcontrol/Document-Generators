@@ -1,5 +1,8 @@
 package com.generator.pdf;
 
+import com.GostHandling.GostTranslator;
+import com.MathNFont.LaTeXToImage;
+
 import java.util.Scanner;
 import java.nio.file.Path;
 import java.nio.file.Files;

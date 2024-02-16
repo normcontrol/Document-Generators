@@ -1,5 +1,7 @@
 package com.generator.pdf;
 
+import com.GostHandling.GostTranslator;
+import com.MathNFont.FontMapper;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;

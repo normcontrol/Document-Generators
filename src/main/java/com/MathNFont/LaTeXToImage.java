@@ -1,4 +1,4 @@
-package com.generator.pdf;
+package com.MathNFont;
 
 import org.scilab.forge.jlatexmath.TeXConstants;
 import org.scilab.forge.jlatexmath.TeXFormula;

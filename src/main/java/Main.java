@@ -1,7 +1,9 @@
 import com.GostHandling.GostSelector;
 import com.generator.pdf.ContentController;
+import com.generator.docx.ContentControllerDocx;
 import com.generator.pdf.PdfGenerator;
-import com.generator.pdf.GostTranslator;
+import com.generator.docx.DocxGenerator;
+import com.GostHandling.GostTranslator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,28 +16,41 @@ public class Main {
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Choose document format: ODT, PDF, DOCX");
+        System.out.println("Choose document format: PDF, DOCX");
         String format = scanner.nextLine().toUpperCase();
 
-        if (!"PDF".equals(format)) {
+        if (!format.equals("PDF") && !format.equals("DOCX")) {
             System.out.println(format + " format support is TODO.");
             return;
         }
 
         Map<String, Object> gostDetails = GostSelector.selectGost();
         if (gostDetails == null) {
-            System.out.println("PDF generation was cancelled due to GOST selection failure.");
+            System.out.println("Document generation was cancelled due to GOST selection failure.");
             return;
         }
         GostTranslator translator = new GostTranslator(gostDetails);
 
         try {
-            PdfGenerator pdfGenerator = new PdfGenerator("docs/custom_document_type5.pdf");
-            ContentController contentController = new ContentController(pdfGenerator, translator);
-            contentController.start();
-            System.out.println("PDF document has been generated.");
+            switch (format) {
+                case "PDF":
+                    PdfGenerator pdfGenerator = new PdfGenerator("docs/custom_document.pdf");
+                    ContentController contentController = new ContentController(pdfGenerator, translator);
+                    contentController.start();
+                    System.out.println("PDF document has been generated.");
+                    break;
+                case "DOCX":
+                    DocxGenerator docxGenerator = new DocxGenerator("docs/custom_document.docx");
+                    ContentControllerDocx contentControllerDocx = new ContentControllerDocx(docxGenerator, translator);
+                    contentControllerDocx.start();
+                    System.out.println("DOCX document has been generated.");
+                    break;
+                default:
+                    break;
+            }
         } catch (IOException e) {
-            logger.error("Error initializing PDF generation: ", e);
+            logger.error("Error initializing document generation: ", e);
         }
     }
 }
+
