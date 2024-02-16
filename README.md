@@ -2,28 +2,21 @@
 Library for generating documents in DOC, ODT & PDF formats.
 
 ## Description
-Library for generating documents in DOC, ODT & PDF formats.
+A simple library for generating documents in DOC, ODT & PDF formats.
 
 ## Features
-```in dev```
+With this module, you can generate documents. Two languages are currently supported: Python and Java.
 
 ## Requirements
-```in dev```
+You need to have Python or Java installed.
 
 ## Installation
-```in dev```
+Download the code and follow the examples.
 
 ## Getting started
-```in dev```
-
-## Docs
-```in dev```
-
-## Contributing
-```in dev```
+1. Download the code;
+2. Go to "docs" directory for Python;
+3. Go to "src/main" directory for Java.
 
 ## Contacts
-```in dev```
-
-## Citation
-```in dev```
+Telegram: @Vl_Tershch
