@@ -6,9 +6,6 @@ import java.nio.file.Files;
 import java.io.IOException;
 import java.awt.image.BufferedImage;
 
-
-import com.itextpdf.layout.properties.HorizontalAlignment;
-
 public class ContentController {
     private final PdfGenerator pdfGenerator;
     private final GostTranslator translator;
@@ -107,9 +104,11 @@ public class ContentController {
                             BufferedImage latexImage = LaTeXToImage.latexToImage(content);
                             Path tempImagePath = LaTeXToImage.saveImageToFile(latexImage);
 
+                            float width = latexImage.getWidth();
+                            float height = latexImage.getHeight();
                             String alignmentStr = "center";
 
-                            pdfGenerator.addImage(tempImagePath.toString(), 70, 50, alignmentStr);
+                            pdfGenerator.addImage(tempImagePath.toString(), width, height, alignmentStr);
                             System.out.println("Формула добавлена в документ.");
 
                             Files.delete(tempImagePath);
